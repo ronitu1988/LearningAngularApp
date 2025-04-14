@@ -1,0 +1,64 @@
+.landing-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(to right, #f9fafb, #edf2f7);
+    min-height: 100vh;
+  
+    .content {
+      max-width: 900px;
+      background-color: #ffffff;
+      padding: 3rem;
+      border-radius: 2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      font-family: 'Segoe UI', sans-serif;
+  
+      h1 {
+        font-size: 2.5rem;
+        color: #0c4a6e;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+      }
+  
+      .description {
+        font-size: 1.125rem;
+        color: #333;
+        margin-bottom: 2rem;
+        line-height: 1.7;
+      }
+  
+      .mission-section {
+        h2 {
+          font-size: 2rem;
+          color: #1d4ed8;
+          margin-bottom: 1rem;
+        }
+  
+        p {
+          font-size: 1rem;
+          color: #555;
+          margin-bottom: 1.5rem;
+        }
+  
+        .values-list {
+          list-style: none;
+          padding-left: 0;
+  
+          li {
+            font-size: 1rem;
+            color: #111;
+            background: #f1f5f9;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.75rem;
+            transition: background 0.3s ease;
+  
+            &:hover {
+              background: #e2e8f0;
+            }
+          }
+        }
+      }
+    }
+  }
