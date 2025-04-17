@@ -46,6 +46,6 @@
   },  
   "options": {
   "outputPath": "dist/LearningAngularApp",
-  "baseHref": "/LearningAngularApp/"
+  "baseHref": "/"
 }
 }
