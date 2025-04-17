@@ -1,0 +1,7 @@
+Deploy to Page:
+    ng build --configuration production --base-href=/ 
+    npx angular-cli-ghpages --dir=dist/learning-angular-app/browser
+
+Use latest version:
+    nvm install v22.13.1
+    nvm use 22.13.1
