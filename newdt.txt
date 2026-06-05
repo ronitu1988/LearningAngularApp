@@ -1,167 +1,54 @@
-ALTER TABLE PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION ADD (
-    ERLID               NUMBER,
-    REMOVED_BY          VARCHAR2(100 BYTE),
-    REMOVED_DT          DATE,
-    REMOVER_COMMENTS    VARCHAR2(1000 BYTE),
-    REMOVED_QTY         NUMBER,
-    APL                 VARCHAR2(100 BYTE),
-    APL_NOM             VARCHAR2(500 BYTE),
-    REMOVAL_UPLOAD_DT   TIMESTAMP(6),
-    REMOVAL_UPDATED_BY  VARCHAR2(100 BYTE)
-);
+using Microsoft.AspNetCore.Mvc;
+using PHTool.Api.Dtos;
+using PHTool.Api.Services;
 
+namespace PHTool.Api.Controllers;
 
-CREATE SEQUENCE PRTHRVST.SEQ_PHT_REMOVAL_ERLID
-    START WITH 9000
-    INCREMENT BY 1
-    NOCACHE
-    NOCYCLE;
-
-
-
-CREATE OR REPLACE PACKAGE PRTHRVST.PKG_PHT_REMOVAL_UPLOAD AS
-
-    PROCEDURE UPDATE_REMOVAL_ROW (
-        P_HULL_ID            IN NUMBER,
-        P_APL                IN VARCHAR2,
-        P_APL_NOM            IN VARCHAR2,
-        P_NIIN_ID            IN NUMBER,
-        P_ERLID              IN NUMBER,
-        P_REMOVED_BY         IN VARCHAR2,
-        P_REMOVED_DT         IN DATE,
-        P_REMOVER_COMMENTS   IN VARCHAR2,
-        P_REMOVED_QTY        IN NUMBER,
-        P_UPDATED_BY         IN VARCHAR2,
-        O_ACTION             OUT VARCHAR2,
-        O_ERLID              OUT NUMBER
-    );
-
-END PKG_PHT_REMOVAL_UPLOAD;
-/
-
-
-CREATE OR REPLACE PACKAGE BODY PRTHRVST.PKG_PHT_REMOVAL_UPLOAD AS
-
-    PROCEDURE UPDATE_REMOVAL_ROW (
-        P_HULL_ID            IN NUMBER,
-        P_APL                IN VARCHAR2,
-        P_APL_NOM            IN VARCHAR2,
-        P_NIIN_ID            IN NUMBER,
-        P_ERLID              IN NUMBER,
-        P_REMOVED_BY         IN VARCHAR2,
-        P_REMOVED_DT         IN DATE,
-        P_REMOVER_COMMENTS   IN VARCHAR2,
-        P_REMOVED_QTY        IN NUMBER,
-        P_UPDATED_BY         IN VARCHAR2,
-        O_ACTION             OUT VARCHAR2,
-        O_ERLID              OUT NUMBER
-    ) AS
-        V_ID NUMBER;
-        V_ERLID NUMBER;
-    BEGIN
-        V_ERLID := NVL(P_ERLID, PRTHRVST.SEQ_PHT_REMOVAL_ERLID.NEXTVAL);
-
-        BEGIN
-            SELECT ID
-            INTO V_ID
-            FROM PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION
-            WHERE HULL_ID = P_HULL_ID
-              AND NVL(APL, 'X') = NVL(P_APL, 'X')
-              AND NIIN_ID = P_NIIN_ID
-              AND IS_DELETED = 0
-            FETCH FIRST 1 ROW ONLY;
-
-            UPDATE PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION
-            SET
-                ERLID = V_ERLID,
-                APL = P_APL,
-                APL_NOM = P_APL_NOM,
-                REMOVED_BY = P_REMOVED_BY,
-                REMOVED_DT = P_REMOVED_DT,
-                REMOVER_COMMENTS = P_REMOVER_COMMENTS,
-                REMOVED_QTY = P_REMOVED_QTY,
-                STATUS =
-                    CASE
-                        WHEN P_REMOVED_DT IS NOT NULL THEN 'Removed'
-                        ELSE STATUS
-                    END,
-                REMOVAL_UPLOAD_DT = SYSTIMESTAMP,
-                REMOVAL_UPDATED_BY = P_UPDATED_BY,
-                UPDATED_DT = SYSTIMESTAMP,
-                UPDATED_BY = P_UPDATED_BY
-            WHERE ID = V_ID;
-
-            O_ACTION := 'UPDATED';
-            O_ERLID := V_ERLID;
-
-        EXCEPTION
-            WHEN NO_DATA_FOUND THEN
-                O_ACTION := 'NO_MATCH';
-                O_ERLID := V_ERLID;
-        END;
-    END UPDATE_REMOVAL_ROW;
-
-END PKG_PHT_REMOVAL_UPLOAD;
-/
-
-
-
-public class RemovalUploadRowDto
+[ApiController]
+[Route("api/removal-upload")]
+public class RemovalUploadController : ControllerBase
 {
-    public decimal? HullId { get; set; }
-    public decimal? Erlid { get; set; }
-    public string? RemovedBy { get; set; }
-    public DateTime? RemovedDate { get; set; }
-    public string? RemoverComments { get; set; }
-    public decimal? RemovedQty { get; set; }
-    public string? Apl { get; set; }
-    public string? AplNom { get; set; }
-    public decimal? Niin { get; set; }
-}
-public class RemovalUploadResultDto
-{
-    public int TotalRows { get; set; }
-    public int UpdatedRows { get; set; }
-    public int NoMatchRows { get; set; }
-    public int ErrorRows { get; set; }
-    public List<RemovalUploadRowResultDto> RowResults { get; set; } = new();
-}
-public class RemovalUploadRowResultDto
-{
-    public int RowNumber { get; set; }
-    public decimal? HullId { get; set; }
-    public string? Apl { get; set; }
-    public decimal? Niin { get; set; }
-    public decimal? Erlid { get; set; }
-    public string Action { get; set; } = "";
-    public string? ErrorMessage { get; set; }
+    private readonly IRemovalUploadService _service;
+
+    public RemovalUploadController(IRemovalUploadService service)
+    {
+        _service = service;
+    }
+
+    [HttpPost("excel")]
+    public async Task<ActionResult<RemovalUploadResultDto>> UploadExcel(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest("Excel file is required.");
+
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+        if (extension != ".xlsx" && extension != ".xls")
+            return BadRequest("Only .xlsx or .xls files are supported.");
+
+        var updatedBy = User?.Identity?.Name ?? "SYSTEM";
+
+        var result = await _service.UploadRemovalExcelAsync(file, updatedBy);
+
+        return Ok(result);
+    }
 }
 
 
 
-public interface IRemovalUploadService
-{
-    Task<RemovalUploadResultDto> UploadRemovalExcelAsync(IFormFile file, string updatedBy);
-}
-
-
-using System.Data;
 using ClosedXML.Excel;
-using Oracle.ManagedDataAccess.Client;
-using Oracle.ManagedDataAccess.Types;
+using PHTool.Api.Data;
+using PHTool.Api.Dtos;
+
+namespace PHTool.Api.Services;
 
 public class RemovalUploadService : IRemovalUploadService
 {
-    private readonly IConfiguration _configuration;
+    private readonly IRemovalUploadRepository _repository;
 
-    public RemovalUploadService(IConfiguration configuration)
+    public RemovalUploadService(IRemovalUploadRepository repository)
     {
-        _configuration = configuration;
-    }
-
-    private OracleConnection GetConnection()
-    {
-        return new OracleConnection(_configuration.GetConnectionString("OracleDb"));
+        _repository = repository;
     }
 
     public async Task<RemovalUploadResultDto> UploadRemovalExcelAsync(IFormFile file, string updatedBy)
@@ -175,7 +62,7 @@ public class RemovalUploadService : IRemovalUploadService
         var headerRow = worksheet.FirstRowUsed();
 
         if (headerRow == null)
-            throw new Exception("Excel file is empty.");
+            throw new InvalidOperationException("Excel file is empty.");
 
         var headers = headerRow.CellsUsed()
             .ToDictionary(
@@ -183,42 +70,59 @@ public class RemovalUploadService : IRemovalUploadService
                 c => c.Address.ColumnNumber
             );
 
-        var rows = worksheet.RowsUsed().Skip(1).ToList();
+        ValidateHeaders(headers);
 
-        await using var conn = GetConnection();
-        await conn.OpenAsync();
-
-        foreach (var row in rows)
+        foreach (var row in worksheet.RowsUsed().Skip(1))
         {
-            result.TotalRows++;
-
             var rowNumber = row.RowNumber();
+            result.TotalRows++;
 
             try
             {
-                var uploadRow = new RemovalUploadRowDto
+                var dto = new RemovalUploadRowDto
                 {
-                    HullId = ToDecimal(GetCell(row, headers, "HULLID")),
-                    Erlid = ToDecimal(GetCell(row, headers, "ERLID")),
-                    RemovedBy = GetCell(row, headers, "REMOVEDBY"),
-                    RemovedDate = ToDate(GetCell(row, headers, "REMOVEDDATE")),
-                    RemoverComments = GetCell(row, headers, "REMOVERCOMMENTS"),
-                    RemovedQty = ToDecimal(GetCell(row, headers, "REMOVEDQTY")),
+                    Hull = GetCell(row, headers, "HULL"),
+                    Niin = GetCell(row, headers, "NIIN"),
                     Apl = GetCell(row, headers, "APL"),
-                    AplNom = GetCell(row, headers, "APLNOM"),
-                    Niin = ToDecimal(GetCell(row, headers, "NIIN"))
+                    PartNumber = GetCell(row, headers, "PARTNUMBER"),
+                    Erlid = ToDecimal(GetCell(row, headers, "ERLID")),
+                    Entered = GetCell(row, headers, "ENTERED"),
+                    Assigned = GetCell(row, headers, "ASSIGNED"),
+                    Removed = GetCell(row, headers, "REMOVED"),
+                    OnBoardLocation = GetCell(row, headers, "ONBOARDLOCATION"),
+                    FundCode = GetCell(row, headers, "FUNDCODE"),
+                    Dd1149 = GetCell(row, headers, "DD1149"),
+                    DateShip = ToDate(GetCell(row, headers, "DATESHIP")),
+                    Complete = GetCell(row, headers, "COMPLETE"),
+                    RemovedQty = ToDecimal(GetCell(row, headers, "REMOVEDQTY")),
+                    InaType = GetCell(row, headers, "INATYPE"),
+                    ShipToId = GetCell(row, headers, "SHIPTOID"),
+                    ErlComment = GetCell(row, headers, "ERLCOMMENT"),
+                    CasRepInd = GetCell(row, headers, "CASREPIND"),
+                    ShipYard = GetCell(row, headers, "SHIPYARD")
                 };
 
-                ValidateRow(uploadRow, rowNumber);
+                ValidateRow(dto, rowNumber);
 
-                var rowResult = await UpdateRemovalRowAsync(conn, uploadRow, updatedBy, rowNumber);
+                var action = await _repository.UpsertRemovalUploadRowAsync(dto, updatedBy);
 
-                result.RowResults.Add(rowResult);
-
-                if (rowResult.Action == "UPDATED")
+                if (action == "UPDATED")
                     result.UpdatedRows++;
-                else if (rowResult.Action == "NO_MATCH")
+                else if (action == "NO_MATCH")
                     result.NoMatchRows++;
+                else
+                    result.ErrorRows++;
+
+                result.RowResults.Add(new RemovalUploadRowResultDto
+                {
+                    RowNumber = rowNumber,
+                    Hull = dto.Hull,
+                    Niin = dto.Niin,
+                    Apl = dto.Apl,
+                    PartNumber = dto.PartNumber,
+                    Erlid = dto.Erlid,
+                    Action = action
+                });
             }
             catch (Exception ex)
             {
@@ -236,78 +140,52 @@ public class RemovalUploadService : IRemovalUploadService
         return result;
     }
 
-    private async Task<RemovalUploadRowResultDto> UpdateRemovalRowAsync(
-        OracleConnection conn,
-        RemovalUploadRowDto row,
-        string updatedBy,
-        int rowNumber)
+    private static void ValidateHeaders(Dictionary<string, int> headers)
     {
-        await using var cmd = conn.CreateCommand();
-
-        cmd.CommandText = "PRTHRVST.PKG_PHT_REMOVAL_UPLOAD.UPDATE_REMOVAL_ROW";
-        cmd.CommandType = CommandType.StoredProcedure;
-        cmd.BindByName = true;
-
-        cmd.Parameters.Add("P_HULL_ID", OracleDbType.Decimal).Value = row.HullId;
-        cmd.Parameters.Add("P_APL", OracleDbType.Varchar2).Value = (object?)row.Apl ?? DBNull.Value;
-        cmd.Parameters.Add("P_APL_NOM", OracleDbType.Varchar2).Value = (object?)row.AplNom ?? DBNull.Value;
-        cmd.Parameters.Add("P_NIIN_ID", OracleDbType.Decimal).Value = row.Niin;
-        cmd.Parameters.Add("P_ERLID", OracleDbType.Decimal).Value = (object?)row.Erlid ?? DBNull.Value;
-        cmd.Parameters.Add("P_REMOVED_BY", OracleDbType.Varchar2).Value = (object?)row.RemovedBy ?? DBNull.Value;
-        cmd.Parameters.Add("P_REMOVED_DT", OracleDbType.Date).Value = (object?)row.RemovedDate ?? DBNull.Value;
-        cmd.Parameters.Add("P_REMOVER_COMMENTS", OracleDbType.Varchar2).Value = (object?)row.RemoverComments ?? DBNull.Value;
-        cmd.Parameters.Add("P_REMOVED_QTY", OracleDbType.Decimal).Value = (object?)row.RemovedQty ?? DBNull.Value;
-        cmd.Parameters.Add("P_UPDATED_BY", OracleDbType.Varchar2).Value = updatedBy;
-
-        var actionParam = new OracleParameter("O_ACTION", OracleDbType.Varchar2, 50)
+        var requiredHeaders = new[]
         {
-            Direction = ParameterDirection.Output
+            "HULL",
+            "NIIN",
+            "APL",
+            "PARTNUMBER",
+            "ERLID",
+            "ENTERED",
+            "ASSIGNED",
+            "REMOVED",
+            "ONBOARDLOCATION",
+            "FUNDCODE",
+            "DD1149",
+            "DATESHIP",
+            "COMPLETE",
+            "REMOVEDQTY",
+            "INATYPE",
+            "SHIPTOID",
+            "ERLCOMMENT",
+            "CASREPIND",
+            "SHIPYARD"
         };
 
-        var erlidParam = new OracleParameter("O_ERLID", OracleDbType.Decimal)
-        {
-            Direction = ParameterDirection.Output
-        };
+        var missing = requiredHeaders
+            .Where(h => !headers.ContainsKey(h))
+            .ToList();
 
-        cmd.Parameters.Add(actionParam);
-        cmd.Parameters.Add(erlidParam);
-
-        await cmd.ExecuteNonQueryAsync();
-
-        var action = actionParam.Value?.ToString() ?? "";
-        var erlid = erlidParam.Value == DBNull.Value
-            ? null
-            : ((OracleDecimal)erlidParam.Value).Value;
-
-        return new RemovalUploadRowResultDto
-        {
-            RowNumber = rowNumber,
-            HullId = row.HullId,
-            Apl = row.Apl,
-            Niin = row.Niin,
-            Erlid = erlid,
-            Action = action
-        };
+        if (missing.Any())
+            throw new InvalidOperationException($"Missing required Excel headers: {string.Join(", ", missing)}");
     }
 
     private static void ValidateRow(RemovalUploadRowDto row, int rowNumber)
     {
-        if (row.HullId == null)
-            throw new Exception($"Row {rowNumber}: Hull Id is required.");
+        if (string.IsNullOrWhiteSpace(row.Hull))
+            throw new InvalidOperationException($"Row {rowNumber}: HULL is required.");
+
+        if (string.IsNullOrWhiteSpace(row.Niin))
+            throw new InvalidOperationException($"Row {rowNumber}: NIIN is required.");
 
         if (string.IsNullOrWhiteSpace(row.Apl))
-            throw new Exception($"Row {rowNumber}: APL is required.");
+            throw new InvalidOperationException($"Row {rowNumber}: APL is required.");
 
-        if (row.Niin == null)
-            throw new Exception($"Row {rowNumber}: NIIN is required.");
-    }
-
-    private static string? GetCell(IXLRow row, Dictionary<string, int> headers, string headerKey)
-    {
-        if (!headers.TryGetValue(headerKey, out var col))
-            return null;
-
-        return row.Cell(col).GetFormattedString().Trim();
+        if (string.IsNullOrWhiteSpace(row.PartNumber))
+            throw new InvalidOperationException($"Row {rowNumber}: PART_NUMBER is required.");
     }
 
     private static string NormalizeHeader(string value)
@@ -318,6 +196,15 @@ public class RemovalUploadService : IRemovalUploadService
             .Replace("-", "")
             .Trim()
             .ToUpperInvariant();
+    }
+
+    private static string? GetCell(IXLRow row, Dictionary<string, int> headers, string headerKey)
+    {
+        if (!headers.TryGetValue(headerKey, out var col))
+            return null;
+
+        var value = row.Cell(col).GetFormattedString()?.Trim();
+        return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
     private static decimal? ToDecimal(string? value)
@@ -349,34 +236,256 @@ public class RemovalUploadService : IRemovalUploadService
 
 
 
-using Microsoft.AspNetCore.Mvc;
+using PHTool.Api.Dtos;
 
-[ApiController]
-[Route("api/removal-upload")]
-public class RemovalUploadController : ControllerBase
+namespace PHTool.Api.Services;
+
+public interface IRemovalUploadService
 {
-    private readonly IRemovalUploadService _service;
+    Task<RemovalUploadResultDto> UploadRemovalExcelAsync(IFormFile file, string updatedBy);
+}
 
-    public RemovalUploadController(IRemovalUploadService service)
+
+
+using System.Data;
+using Oracle.ManagedDataAccess.Client;
+using PHTool.Api.Dtos;
+
+namespace PHTool.Api.Data;
+
+public class RemovalUploadRepository : IRemovalUploadRepository
+{
+    private readonly IConfiguration _configuration;
+
+    public RemovalUploadRepository(IConfiguration configuration)
     {
-        _service = service;
+        _configuration = configuration;
     }
 
-    [HttpPost("excel")]
-    public async Task<ActionResult<RemovalUploadResultDto>> UploadExcel(IFormFile file)
+    private OracleConnection GetConnection()
     {
-        if (file == null || file.Length == 0)
-            return BadRequest("File is required.");
+        return new OracleConnection(_configuration.GetConnectionString("OracleDb"));
+    }
 
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+    public async Task<string> UpsertRemovalUploadRowAsync(RemovalUploadRowDto row, string updatedBy)
+    {
+        await using var conn = GetConnection();
+        await conn.OpenAsync();
 
-        if (extension != ".xlsx" && extension != ".xls")
-            return BadRequest("Only Excel files are supported.");
+        await using var cmd = conn.CreateCommand();
+        cmd.CommandText = "PRTHRVST.PKG_PHT_REMOVAL_UPLOAD.UPSERT_REMOVAL_UPLOAD_ROW";
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.BindByName = true;
 
-        var updatedBy = User?.Identity?.Name ?? "SYSTEM";
+        cmd.Parameters.Add("P_HULL", OracleDbType.Varchar2).Value = (object?)row.Hull ?? DBNull.Value;
+        cmd.Parameters.Add("P_NIIN", OracleDbType.Varchar2).Value = (object?)row.Niin ?? DBNull.Value;
+        cmd.Parameters.Add("P_APL", OracleDbType.Varchar2).Value = (object?)row.Apl ?? DBNull.Value;
+        cmd.Parameters.Add("P_PART_NUMBER", OracleDbType.Varchar2).Value = (object?)row.PartNumber ?? DBNull.Value;
+        cmd.Parameters.Add("P_ERLID", OracleDbType.Decimal).Value = (object?)row.Erlid ?? DBNull.Value;
+        cmd.Parameters.Add("P_ENTERED", OracleDbType.Varchar2).Value = (object?)row.Entered ?? DBNull.Value;
+        cmd.Parameters.Add("P_ASSIGNED", OracleDbType.Varchar2).Value = (object?)row.Assigned ?? DBNull.Value;
+        cmd.Parameters.Add("P_REMOVED", OracleDbType.Varchar2).Value = (object?)row.Removed ?? DBNull.Value;
+        cmd.Parameters.Add("P_ONBOARD_LOCATION", OracleDbType.Varchar2).Value = (object?)row.OnBoardLocation ?? DBNull.Value;
+        cmd.Parameters.Add("P_FUND_CODE", OracleDbType.Varchar2).Value = (object?)row.FundCode ?? DBNull.Value;
+        cmd.Parameters.Add("P_DD1149", OracleDbType.Varchar2).Value = (object?)row.Dd1149 ?? DBNull.Value;
+        cmd.Parameters.Add("P_DATE_SHIP", OracleDbType.Date).Value = (object?)row.DateShip ?? DBNull.Value;
+        cmd.Parameters.Add("P_COMPLETE", OracleDbType.Varchar2).Value = (object?)row.Complete ?? DBNull.Value;
+        cmd.Parameters.Add("P_REMOVED_QTY", OracleDbType.Decimal).Value = (object?)row.RemovedQty ?? DBNull.Value;
+        cmd.Parameters.Add("P_INA_TYPE", OracleDbType.Varchar2).Value = (object?)row.InaType ?? DBNull.Value;
+        cmd.Parameters.Add("P_SHIP_TO_ID", OracleDbType.Varchar2).Value = (object?)row.ShipToId ?? DBNull.Value;
+        cmd.Parameters.Add("P_ERL_COMMENT", OracleDbType.Varchar2).Value = (object?)row.ErlComment ?? DBNull.Value;
+        cmd.Parameters.Add("P_CAS_REP_IND", OracleDbType.Varchar2).Value = (object?)row.CasRepInd ?? DBNull.Value;
+        cmd.Parameters.Add("P_SHIPYARD", OracleDbType.Varchar2).Value = (object?)row.ShipYard ?? DBNull.Value;
+        cmd.Parameters.Add("P_UPDATED_BY", OracleDbType.Varchar2).Value = updatedBy;
 
-        var result = await _service.UploadRemovalExcelAsync(file, updatedBy);
+        var actionParam = new OracleParameter("O_ACTION", OracleDbType.Varchar2, 50)
+        {
+            Direction = ParameterDirection.Output
+        };
 
-        return Ok(result);
+        cmd.Parameters.Add(actionParam);
+
+        await cmd.ExecuteNonQueryAsync();
+
+        return actionParam.Value?.ToString() ?? "UNKNOWN";
     }
 }
+
+
+
+
+using PHTool.Api.Dtos;
+
+namespace PHTool.Api.Data;
+
+public interface IRemovalUploadRepository
+{
+    Task<string> UpsertRemovalUploadRowAsync(RemovalUploadRowDto row, string updatedBy);
+}
+
+
+
+
+namespace PHTool.Api.Dtos;
+
+public class RemovalUploadRowResultDto
+{
+    public int RowNumber { get; set; }
+    public string? Hull { get; set; }
+    public string? Niin { get; set; }
+    public string? Apl { get; set; }
+    public string? PartNumber { get; set; }
+    public decimal? Erlid { get; set; }
+    public string Action { get; set; } = "";
+    public string? ErrorMessage { get; set; }
+}
+
+namespace PHTool.Api.Dtos;
+
+public class RemovalUploadResultDto
+{
+    public int TotalRows { get; set; }
+    public int UpdatedRows { get; set; }
+    public int NoMatchRows { get; set; }
+    public int ErrorRows { get; set; }
+
+    public List<RemovalUploadRowResultDto> RowResults { get; set; } = new();
+}
+
+
+namespace PHTool.Api.Dtos;
+
+public class RemovalUploadRowDto
+{
+    public string? Hull { get; set; }
+    public string? Niin { get; set; }
+    public string? Apl { get; set; }
+    public string? PartNumber { get; set; }
+    public decimal? Erlid { get; set; }
+    public string? Entered { get; set; }
+    public string? Assigned { get; set; }
+    public string? Removed { get; set; }
+    public string? OnBoardLocation { get; set; }
+    public string? FundCode { get; set; }
+    public string? Dd1149 { get; set; }
+    public DateTime? DateShip { get; set; }
+    public string? Complete { get; set; }
+    public decimal? RemovedQty { get; set; }
+    public string? InaType { get; set; }
+    public string? ShipToId { get; set; }
+    public string? ErlComment { get; set; }
+    public string? CasRepInd { get; set; }
+    public string? ShipYard { get; set; }
+}
+
+
+
+
+CREATE OR REPLACE PACKAGE BODY PRTHRVST.PKG_PHT_REMOVAL_UPLOAD AS
+
+    PROCEDURE UPSERT_REMOVAL_UPLOAD_ROW (
+        P_HULL              IN VARCHAR2,
+        P_NIIN              IN VARCHAR2,
+        P_APL               IN VARCHAR2,
+        P_PART_NUMBER       IN VARCHAR2,
+        P_ERLID             IN NUMBER,
+        P_ENTERED           IN VARCHAR2,
+        P_ASSIGNED          IN VARCHAR2,
+        P_REMOVED           IN VARCHAR2,
+        P_ONBOARD_LOCATION  IN VARCHAR2,
+        P_FUND_CODE         IN VARCHAR2,
+        P_DD1149            IN VARCHAR2,
+        P_DATE_SHIP         IN DATE,
+        P_COMPLETE          IN VARCHAR2,
+        P_REMOVED_QTY       IN NUMBER,
+        P_INA_TYPE          IN VARCHAR2,
+        P_SHIP_TO_ID        IN VARCHAR2,
+        P_ERL_COMMENT       IN VARCHAR2,
+        P_CAS_REP_IND       IN VARCHAR2,
+        P_SHIPYARD          IN VARCHAR2,
+        P_UPDATED_BY        IN VARCHAR2,
+        O_ACTION            OUT VARCHAR2
+    ) AS
+        V_ID NUMBER;
+    BEGIN
+        BEGIN
+            SELECT ID
+            INTO V_ID
+            FROM PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION
+            WHERE TO_CHAR(HULL_ID) = TRIM(P_HULL)
+              AND TO_CHAR(NIIN_ID) = TRIM(P_NIIN)
+              AND NVL(TRIM(APL), 'X') = NVL(TRIM(P_APL), 'X')
+              AND NVL(TRIM(PART_NUMBER), 'X') = NVL(TRIM(P_PART_NUMBER), 'X')
+              AND IS_DELETED = 0
+            FETCH FIRST 1 ROW ONLY;
+
+            UPDATE PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION
+            SET
+                ERLID = P_ERLID,
+                ENTERED = P_ENTERED,
+                ASSIGNED = P_ASSIGNED,
+                REMOVED = P_REMOVED,
+                ONBOARD_LOCATION = P_ONBOARD_LOCATION,
+                FUND_CODE = P_FUND_CODE,
+                DD1149 = P_DD1149,
+                DATE_SHIP = P_DATE_SHIP,
+                COMPLETE = P_COMPLETE,
+                REMOVED_QTY = P_REMOVED_QTY,
+                INA_TYPE = P_INA_TYPE,
+                SHIP_TO_ID = P_SHIP_TO_ID,
+                ERL_COMMENT = P_ERL_COMMENT,
+                CAS_REP_IND = P_CAS_REP_IND,
+                SHIPYARD = P_SHIPYARD,
+                STATUS =
+                    CASE
+                        WHEN UPPER(NVL(P_COMPLETE, 'N')) IN ('Y', 'YES', 'TRUE', 'COMPLETE')
+                          OR UPPER(NVL(P_REMOVED, 'N')) IN ('Y', 'YES', 'TRUE', 'REMOVED')
+                        THEN 'Removed'
+                        ELSE STATUS
+                    END,
+                REMOVAL_UPLOAD_DT = SYSTIMESTAMP,
+                REMOVAL_UPDATED_BY = P_UPDATED_BY,
+                UPDATED_DT = SYSTIMESTAMP,
+                UPDATED_BY = P_UPDATED_BY
+            WHERE ID = V_ID;
+
+            O_ACTION := 'UPDATED';
+
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                O_ACTION := 'NO_MATCH';
+        END;
+    END UPSERT_REMOVAL_UPLOAD_ROW;
+
+END PKG_PHT_REMOVAL_UPLOAD;
+/
+
+
+CREATE OR REPLACE PACKAGE PRTHRVST.PKG_PHT_REMOVAL_UPLOAD AS
+
+    PROCEDURE UPSERT_REMOVAL_UPLOAD_ROW (
+        P_HULL              IN VARCHAR2,
+        P_NIIN              IN VARCHAR2,
+        P_APL               IN VARCHAR2,
+        P_PART_NUMBER       IN VARCHAR2,
+        P_ERLID             IN NUMBER,
+        P_ENTERED           IN VARCHAR2,
+        P_ASSIGNED          IN VARCHAR2,
+        P_REMOVED           IN VARCHAR2,
+        P_ONBOARD_LOCATION  IN VARCHAR2,
+        P_FUND_CODE         IN VARCHAR2,
+        P_DD1149            IN VARCHAR2,
+        P_DATE_SHIP         IN DATE,
+        P_COMPLETE          IN VARCHAR2,
+        P_REMOVED_QTY       IN NUMBER,
+        P_INA_TYPE          IN VARCHAR2,
+        P_SHIP_TO_ID        IN VARCHAR2,
+        P_ERL_COMMENT       IN VARCHAR2,
+        P_CAS_REP_IND       IN VARCHAR2,
+        P_SHIPYARD          IN VARCHAR2,
+        P_UPDATED_BY        IN VARCHAR2,
+        O_ACTION            OUT VARCHAR2
+    );
+
+END PKG_PHT_REMOVAL_UPLOAD;
+/
