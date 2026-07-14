@@ -1,146 +1,1501 @@
-using Microsoft.AspNetCore.Mvc;
-using PHTool.Api.Dtos;
-using PHTool.Api.Services;
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f5f7fb;
+  color: #182230;
+}
 
-namespace PHTool.Api.Controllers;
+.page {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.page-header p,
+.table-header p,
+.upload-modal p {
+  margin: 6px 0 0;
+  color: #667085;
+}
+
+.primary-button,
+.secondary-button,
+.location-tabs button,
+.pagination button {
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary-button {
+  color: white;
+  background: #2563eb;
+}
+
+.secondary-button,
+.pagination button {
+  color: #344054;
+  background: #eaecf0;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 1fr)
+    minmax(320px, 1.5fr)
+    minmax(180px, 1fr)
+    minmax(180px, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.summary-card,
+.chart-card,
+.content-card {
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.06);
+}
+
+.summary-card {
+  min-height: 150px;
+  padding: 24px;
+}
+
+.summary-label {
+  font-weight: 700;
+}
+
+.summary-number {
+  margin-top: 12px;
+  font-size: 42px;
+  font-weight: 800;
+}
+
+.summary-unit {
+  color: #667085;
+}
+
+.chart-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px;
+}
+
+.donut {
+  position: relative;
+  width: 130px;
+  min-width: 130px;
+  height: 130px;
+  border-radius: 50%;
+}
+
+.donut::after {
+  position: absolute;
+  inset: 27px;
+  content: "";
+  border-radius: 50%;
+  background: white;
+}
+
+.donut-center {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475467;
+  font-size: 13px;
+}
+
+.legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.content-card {
+  padding: 20px;
+}
+
+.location-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.location-tabs button {
+  border-radius: 0;
+  background: transparent;
+  color: #667085;
+  white-space: nowrap;
+}
+
+.location-tabs button.active {
+  color: #175cd3;
+  border-bottom: 2px solid #175cd3;
+}
+
+.table-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.table-header h2 {
+  margin: 0;
+}
+
+.search-area {
+  display: flex;
+  gap: 8px;
+}
+
+.search-area input {
+  width: 320px;
+  padding: 9px 11px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+}
+
+.table-wrapper {
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 1800px;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px;
+  border-bottom: 1px solid #eaecf0;
+  text-align: left;
+  vertical-align: top;
+  font-size: 13px;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  background: #f9fafb;
+  white-space: nowrap;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.done {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.empty-row {
+  padding: 30px;
+  color: #667085;
+  text-align: center;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.pagination div {
+  display: flex;
+  gap: 8px;
+}
+
+.message {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 7px;
+}
+
+.message.success {
+  color: #067647;
+  background: #ecfdf3;
+}
+
+.message.error {
+  color: #b42318;
+  background: #fef3f2;
+}
+
+.modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(16, 24, 40, 0.55);
+}
+
+.upload-modal {
+  width: min(560px, 100%);
+  padding: 22px;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 20px 40px rgba(16, 24, 40, 0.25);
+}
+
+.upload-modal header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.upload-modal h2 {
+  margin: 0;
+}
+
+.close-button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 28px;
+}
+
+.upload-modal label {
+  display: block;
+  margin-bottom: 18px;
+  font-weight: 700;
+}
+
+.upload-modal select,
+.upload-modal input[type="file"] {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 7px;
+  padding: 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+}
+
+.upload-results {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 1100px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 14px;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header,
+  .table-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .search-area input {
+    width: 100%;
+  }
+}
+
+
+------------
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Removal Status</h1>
+      <p>
+        Track approved material requests against removal
+        and shipyard execution details.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openUpload()">
+      Add / Upload
+    </button>
+  </header>
+
+  <div
+    *ngIf="successMessage"
+    class="message success">
+    {{ successMessage }}
+  </div>
+
+  <div
+    *ngIf="errorMessage"
+    class="message error">
+    {{ errorMessage }}
+  </div>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <div class="summary-label">Total Stocked</div>
+
+      <div class="summary-number">
+        {{ dashboard().summary.totalStocked }}
+      </div>
+
+      <div class="summary-unit">Items</div>
+    </article>
+
+    <article class="chart-card">
+      <div
+        class="donut"
+        [ngStyle]="donutStyle()">
+        <div class="donut-center">
+          {{ dashboard().summary.totalStocked }}
+        </div>
+      </div>
+
+      <div class="legend">
+        <div
+          *ngFor="
+            let item of dashboard().locationBreakdown;
+            let index = index
+          "
+          class="legend-row">
+
+          <span
+            class="legend-color"
+            [style.background]="
+              chartColors[index % chartColors.length]
+            ">
+          </span>
+
+          <span>
+            {{ item.location }}
+            {{ percentage(item) | number:'1.0-1' }}%
+          </span>
+        </div>
+      </div>
+    </article>
+
+    <article class="summary-card">
+      <div class="summary-label">
+        Removed / Shipped
+      </div>
+
+      <div class="summary-number">
+        {{ dashboard().summary.removedShipped }}
+      </div>
+
+      <div class="summary-unit">Items</div>
+    </article>
+
+    <article class="summary-card">
+      <div class="summary-label">In Process</div>
+
+      <div class="summary-number">
+        {{ dashboard().summary.inProcess }}
+      </div>
+
+      <div class="summary-unit">Items</div>
+    </article>
+  </section>
+
+  <section class="content-card">
+    <div class="location-tabs">
+      <button
+        type="button"
+        [class.active]="selectedLocation() === null"
+        (click)="selectLocation(null)">
+        All Locations
+      </button>
+
+      <button
+        *ngFor="let location of locations()"
+        type="button"
+        [class.active]="
+          selectedLocation() === location
+        "
+        (click)="selectLocation(location)">
+        {{ location }}
+      </button>
+    </div>
+
+    <div class="table-header">
+      <div>
+        <h2>Removal Status Data</h2>
+
+        <p>
+          Baseline request data with removal and
+          shipyard execution details.
+        </p>
+      </div>
+
+      <div class="search-area">
+        <input
+          type="search"
+          [(ngModel)]="search"
+          placeholder="Search ERLID, Hull, NIIN, APL..."
+          (keyup.enter)="applySearch()" />
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="applySearch()">
+          Apply
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ERLID</th>
+            <th>Hull</th>
+            <th>APL</th>
+            <th>NIIN</th>
+            <th>Part Number</th>
+            <th>Location</th>
+            <th>Removed Qty</th>
+            <th>Entered</th>
+            <th>Assigned</th>
+            <th>Removed</th>
+            <th>Completed</th>
+            <th>DD1149</th>
+            <th>Date Shipped</th>
+            <th>Fund Code</th>
+            <th>Shipyard</th>
+            <th>Comments</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let row of rows()">
+            <td>{{ row.erlid || '-' }}</td>
+            <td>{{ row.hull || '-' }}</td>
+            <td>{{ row.apl || '-' }}</td>
+            <td>{{ row.niin || '-' }}</td>
+            <td>{{ row.partNumber || '-' }}</td>
+            <td>
+              {{ row.onBoardLocation || '-' }}
+            </td>
+            <td>{{ row.removedQty ?? '-' }}</td>
+            <td>{{ row.entered || '-' }}</td>
+            <td>{{ row.assigned || '-' }}</td>
+
+            <td>
+              <span
+                class="status-badge"
+                [class.done]="
+                  row.removed === 'Y'
+                  || row.removed === 'Yes'
+                  || row.removed === 'Removed'
+                ">
+                {{ row.removed || '-' }}
+              </span>
+            </td>
+
+            <td>{{ row.complete || '-' }}</td>
+            <td>{{ row.dd1149 || '-' }}</td>
+
+            <td>
+              {{
+                row.dateShip
+                  ? (row.dateShip | date:'MM/dd/yyyy')
+                  : '-'
+              }}
+            </td>
+
+            <td>{{ row.fundCode || '-' }}</td>
+            <td>{{ row.shipYard || '-' }}</td>
+            <td>{{ row.erlComment || '-' }}</td>
+          </tr>
+
+          <tr *ngIf="!loading() && rows().length === 0">
+            <td colspan="16" class="empty-row">
+              No removal-status records found.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="pagination">
+      <span>
+        Page {{ page }} · {{ totalCount() }} records
+      </span>
+
+      <div>
+        <button
+          type="button"
+          [disabled]="page <= 1"
+          (click)="previousPage()">
+          Previous
+        </button>
+
+        <button
+          type="button"
+          [disabled]="
+            page * pageSize >= totalCount()
+          "
+          (click)="nextPage()">
+          Next
+        </button>
+      </div>
+    </footer>
+  </section>
+</div>
+
+<div
+  *ngIf="showUploadPanel"
+  class="modal-backdrop">
+
+  <section class="upload-modal">
+    <header>
+      <div>
+        <h2>Upload Removal Status</h2>
+        <p>
+          Select a location and upload the removal
+          status Excel file.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="closeUpload()">
+        ×
+      </button>
+    </header>
+
+    <label>
+      Location
+
+      <select [(ngModel)]="uploadLocation">
+        <option value="">
+          Select location
+        </option>
+
+        <option
+          *ngFor="let location of locations()"
+          [value]="location">
+          {{ location }}
+        </option>
+      </select>
+    </label>
+
+    <label>
+      Excel File
+
+      <input
+        type="file"
+        accept=".xlsx"
+        (change)="onFileSelected($event)" />
+    </label>
+
+    <div
+      *ngIf="uploadResult"
+      class="upload-results">
+
+      <div>
+        Total rows:
+        <strong>{{ uploadResult.totalRows }}</strong>
+      </div>
+
+      <div>
+        Updated:
+        <strong>{{ uploadResult.updatedRows }}</strong>
+      </div>
+
+      <div>
+        No match:
+        <strong>{{ uploadResult.noMatchRows }}</strong>
+      </div>
+
+      <div>
+        Invalid:
+        <strong>{{ uploadResult.invalidRows }}</strong>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="closeUpload()">
+        Close
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="uploading()"
+        (click)="upload()">
+        {{
+          uploading()
+            ? 'Uploading...'
+            : 'Upload Excel'
+        }}
+      </button>
+    </div>
+  </section>
+</div>
+
+------------
+import { CommonModule } from '@angular/common';
+import {
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+import {
+  LocationBreakdown,
+  RemovalDashboard,
+  RemovalGridRow,
+  RemovalUploadResult
+} from './removal-status.models';
+
+import { RemovalStatusService } from './removal-status.service';
+
+@Component({
+  selector: 'app-removal-status',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule
+  ],
+  templateUrl: './removal-status.component.html',
+  styleUrls: ['./removal-status.component.css']
+})
+export class RemovalStatusComponent implements OnInit {
+  private readonly service = inject(RemovalStatusService);
+
+  readonly locations = signal<string[]>([]);
+  readonly selectedLocation = signal<string | null>(null);
+
+  readonly dashboard = signal<RemovalDashboard>({
+    summary: {
+      totalStocked: 0,
+      removedShipped: 0,
+      completed: 0,
+      inProcess: 0
+    },
+    locationBreakdown: []
+  });
+
+  readonly rows = signal<RemovalGridRow[]>([]);
+  readonly totalCount = signal(0);
+  readonly loading = signal(false);
+  readonly uploading = signal(false);
+
+  search = '';
+  page = 1;
+  pageSize = 50;
+
+  showUploadPanel = false;
+  uploadLocation = '';
+  selectedFile: File | null = null;
+
+  successMessage = '';
+  errorMessage = '';
+  uploadResult?: RemovalUploadResult;
+
+  readonly donutStyle = computed(() => {
+    const values = this.dashboard().locationBreakdown;
+
+    const total = values.reduce(
+      (sum, item) => sum + item.itemCount,
+      0
+    );
+
+    if (total === 0) {
+      return {
+        background: '#e5e7eb'
+      };
+    }
+
+    const colors = [
+      '#1d4ed8',
+      '#059669',
+      '#f59e0b',
+      '#7c3aed',
+      '#dc2626',
+      '#0891b2'
+    ];
+
+    let current = 0;
+
+    const segments = values.map((item, index) => {
+      const start = current;
+      const end =
+        current + (item.itemCount / total) * 100;
+
+      current = end;
+
+      return `${colors[index % colors.length]} ${start}% ${end}%`;
+    });
+
+    return {
+      background: `conic-gradient(${segments.join(', ')})`
+    };
+  });
+
+  readonly chartColors = [
+    '#1d4ed8',
+    '#059669',
+    '#f59e0b',
+    '#7c3aed',
+    '#dc2626',
+    '#0891b2'
+  ];
+
+  ngOnInit(): void {
+    this.loadLocations();
+    this.loadPage();
+  }
+
+  loadLocations(): void {
+    this.service.getLocations().subscribe({
+      next: locations => {
+        this.locations.set(locations);
+      },
+      error: error => {
+        console.error(error);
+        this.errorMessage = 'Unable to load locations.';
+      }
+    });
+  }
+
+  loadPage(): void {
+    this.loadDashboard();
+    this.loadGrid();
+  }
+
+  loadDashboard(): void {
+    this.service
+      .getDashboard(this.selectedLocation())
+      .subscribe({
+        next: result => {
+          this.dashboard.set(result);
+        },
+        error: error => {
+          console.error(error);
+          this.errorMessage =
+            'Unable to load removal summary.';
+        }
+      });
+  }
+
+  loadGrid(): void {
+    this.loading.set(true);
+
+    this.service.getGrid({
+      location: this.selectedLocation(),
+      search: this.search,
+      page: this.page,
+      pageSize: this.pageSize
+    }).subscribe({
+      next: result => {
+        this.rows.set(result.items);
+        this.totalCount.set(result.totalCount);
+        this.loading.set(false);
+      },
+      error: error => {
+        console.error(error);
+        this.errorMessage =
+          'Unable to load removal-status records.';
+        this.loading.set(false);
+      }
+    });
+  }
+
+  selectLocation(location: string | null): void {
+    this.selectedLocation.set(location);
+    this.page = 1;
+    this.loadPage();
+  }
+
+  applySearch(): void {
+    this.page = 1;
+    this.loadGrid();
+  }
+
+  previousPage(): void {
+    if (this.page <= 1) {
+      return;
+    }
+
+    this.page--;
+    this.loadGrid();
+  }
+
+  nextPage(): void {
+    if (this.page * this.pageSize >= this.totalCount()) {
+      return;
+    }
+
+    this.page++;
+    this.loadGrid();
+  }
+
+  openUpload(): void {
+    this.showUploadPanel = true;
+    this.uploadLocation =
+      this.selectedLocation() ?? '';
+    this.selectedFile = null;
+    this.successMessage = '';
+    this.errorMessage = '';
+    this.uploadResult = undefined;
+  }
+
+  closeUpload(): void {
+    this.showUploadPanel = false;
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    this.selectedFile =
+      input.files?.length
+        ? input.files[0]
+        : null;
+  }
+
+  upload(): void {
+    if (!this.uploadLocation) {
+      this.errorMessage =
+        'Select a location before uploading.';
+      return;
+    }
+
+    if (!this.selectedFile) {
+      this.errorMessage =
+        'Select an Excel file before uploading.';
+      return;
+    }
+
+    this.uploading.set(true);
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    this.service
+      .uploadExcel(
+        this.selectedFile,
+        this.uploadLocation
+      )
+      .subscribe({
+        next: result => {
+          this.uploadResult = result;
+
+          this.successMessage =
+            `${result.updatedRows} records updated. ` +
+            `${result.noMatchRows} records did not match.`;
+
+          this.uploading.set(false);
+
+          this.selectedLocation.set(
+            this.uploadLocation
+          );
+
+          this.loadLocations();
+          this.loadPage();
+        },
+        error: error => {
+          console.error(error);
+
+          this.errorMessage =
+            error?.error?.message
+            ?? error?.error
+            ?? 'Excel upload failed.';
+
+          this.uploading.set(false);
+        }
+      });
+  }
+
+  percentage(item: LocationBreakdown): number {
+    const total = this.dashboard()
+      .locationBreakdown
+      .reduce(
+        (sum, row) => sum + row.itemCount,
+        0
+      );
+
+    return total === 0
+      ? 0
+      : (item.itemCount / total) * 100;
+  }
+}
+
+
+---------------------------------------------------------
+
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+import {
+  PagedResult,
+  RemovalDashboard,
+  RemovalGridRow,
+  RemovalUploadResult
+} from './removal-status.models';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class RemovalStatusService {
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = '/api/removal-status';
+
+  getLocations(): Observable<string[]> {
+    return this.http.get<string[]>(
+      `${this.baseUrl}/locations`
+    );
+  }
+
+  getDashboard(
+    location?: string | null
+  ): Observable<RemovalDashboard> {
+    let params = new HttpParams();
+
+    if (location) {
+      params = params.set('location', location);
+    }
+
+    return this.http.get<RemovalDashboard>(
+      `${this.baseUrl}/dashboard`,
+      { params }
+    );
+  }
+
+  getGrid(filters: {
+    location?: string | null;
+    search?: string | null;
+    page: number;
+    pageSize: number;
+  }): Observable<PagedResult<RemovalGridRow>> {
+    let params = new HttpParams()
+      .set('page', filters.page)
+      .set('pageSize', filters.pageSize);
+
+    if (filters.location) {
+      params = params.set('location', filters.location);
+    }
+
+    if (filters.search) {
+      params = params.set('search', filters.search);
+    }
+
+    return this.http.get<PagedResult<RemovalGridRow>>(
+      `${this.baseUrl}/grid`,
+      { params }
+    );
+  }
+
+  uploadExcel(
+    file: File,
+    location: string
+  ): Observable<RemovalUploadResult> {
+    const formData = new FormData();
+
+    formData.append('file', file);
+    formData.append('location', location);
+
+    return this.http.post<RemovalUploadResult>(
+      `${this.baseUrl}/upload`,
+      formData
+    );
+  }
+}
+
+
+----------------
+
+
+export interface RemovalSummary {
+  totalStocked: number;
+  removedShipped: number;
+  completed: number;
+  inProcess: number;
+}
+
+export interface LocationBreakdown {
+  location: string;
+  itemCount: number;
+}
+
+export interface RemovalDashboard {
+  summary: RemovalSummary;
+  locationBreakdown: LocationBreakdown[];
+}
+
+export interface RemovalGridRow {
+  id: number;
+  hull?: string;
+  niin?: string;
+  apl?: string;
+  partNumber?: string;
+  erlid?: number;
+  entered?: string;
+  assigned?: string;
+  removed?: string;
+  onBoardLocation?: string;
+  fundCode?: string;
+  dd1149?: string;
+  dateShip?: string;
+  complete?: string;
+  removedQty?: number;
+  inaType?: string;
+  shipToId?: string;
+  erlComment?: string;
+  casRepInd?: string;
+  shipYard?: string;
+  removalLocation?: string;
+}
+
+export interface PagedResult<T> {
+  totalCount: number;
+  items: T[];
+}
+
+export interface RemovalUploadError {
+  rowNumber: number;
+  message: string;
+}
+
+export interface RemovalUploadResult {
+  totalRows: number;
+  validRows: number;
+  invalidRows: number;
+  updatedRows: number;
+  noMatchRows: number;
+  errors: RemovalUploadError[];
+}
+
+
+--------------
+using Microsoft.AspNetCore.Mvc;
+using Pht.Api.RemovalStatus.Dtos;
+using Pht.Api.RemovalStatus.Services;
+
+namespace Pht.Api.RemovalStatus.Controllers;
 
 [ApiController]
-[Route("api/removal-upload")]
-public class RemovalUploadController : ControllerBase
+[Route("api/removal-status")]
+public sealed class RemovalStatusController : ControllerBase
 {
-    private readonly IRemovalUploadService _service;
+    private readonly IRemovalStatusService _service;
 
-    public RemovalUploadController(IRemovalUploadService service)
+    public RemovalStatusController(
+        IRemovalStatusService service)
     {
         _service = service;
     }
 
-    [HttpPost("excel")]
-    public async Task<ActionResult<RemovalUploadResultDto>> UploadExcel(IFormFile file)
+    [HttpGet("locations")]
+    public async Task<ActionResult<IReadOnlyList<string>>> GetLocations(
+        CancellationToken cancellationToken)
     {
-        if (file == null || file.Length == 0)
+        var locations =
+            await _service.GetLocationsAsync(cancellationToken);
+
+        return Ok(locations);
+    }
+
+    [HttpGet("dashboard")]
+    public async Task<ActionResult<RemovalDashboardDto>> GetDashboard(
+        [FromQuery] string? location,
+        CancellationToken cancellationToken)
+    {
+        var result =
+            await _service.GetDashboardAsync(
+                location,
+                cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpGet("grid")]
+    public async Task<
+        ActionResult<PagedResultDto<RemovalGridRowDto>>> GetGrid(
+            [FromQuery] string? location,
+            [FromQuery] string? search,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50,
+            CancellationToken cancellationToken = default)
+    {
+        var result =
+            await _service.GetGridAsync(
+                location,
+                search,
+                page,
+                pageSize,
+                cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpPost("upload")]
+    [RequestSizeLimit(50_000_000)]
+    public async Task<ActionResult<RemovalUploadResultDto>> Upload(
+        [FromForm] IFormFile file,
+        [FromForm] string location,
+        CancellationToken cancellationToken)
+    {
+        if (file is null)
             return BadRequest("Excel file is required.");
 
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(location))
+            return BadRequest("Location is required.");
 
-        if (extension != ".xlsx" && extension != ".xls")
-            return BadRequest("Only .xlsx or .xls files are supported.");
+        var updatedBy =
+            User?.Identity?.Name ?? "SYSTEM";
 
-        var updatedBy = User?.Identity?.Name ?? "SYSTEM";
-
-        var result = await _service.UploadRemovalExcelAsync(file, updatedBy);
+        var result =
+            await _service.UploadAsync(
+                file,
+                location,
+                updatedBy,
+                cancellationToken);
 
         return Ok(result);
     }
 }
 
 
+----------------
 
-using ClosedXML.Excel;
-using PHTool.Api.Data;
-using PHTool.Api.Dtos;
+using System.Globalization;
+using OfficeOpenXml;
+using Pht.Api.RemovalStatus.Data;
+using Pht.Api.RemovalStatus.Dtos;
 
-namespace PHTool.Api.Services;
+namespace Pht.Api.RemovalStatus.Services;
 
-public class RemovalUploadService : IRemovalUploadService
+public sealed class RemovalStatusService : IRemovalStatusService
 {
-    private readonly IRemovalUploadRepository _repository;
+    private readonly IRemovalStatusRepository _repository;
 
-    public RemovalUploadService(IRemovalUploadRepository repository)
+    public RemovalStatusService(
+        IRemovalStatusRepository repository)
     {
         _repository = repository;
     }
 
-    public async Task<RemovalUploadResultDto> UploadRemovalExcelAsync(IFormFile file, string updatedBy)
+    public Task<IReadOnlyList<string>> GetLocationsAsync(
+        CancellationToken cancellationToken = default)
     {
-        var result = new RemovalUploadResultDto();
+        return _repository.GetLocationsAsync(cancellationToken);
+    }
+
+    public async Task<RemovalDashboardDto> GetDashboardAsync(
+        string? location,
+        CancellationToken cancellationToken = default)
+    {
+        var summaryTask =
+            _repository.GetSummaryAsync(location, cancellationToken);
+
+        var breakdownTask =
+            _repository.GetLocationBreakdownAsync(cancellationToken);
+
+        await Task.WhenAll(summaryTask, breakdownTask);
+
+        return new RemovalDashboardDto
+        {
+            Summary = await summaryTask,
+            LocationBreakdown = await breakdownTask
+        };
+    }
+
+    public Task<PagedResultDto<RemovalGridRowDto>> GetGridAsync(
+        string? location,
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        return _repository.GetGridAsync(
+            location,
+            search,
+            page,
+            pageSize,
+            cancellationToken);
+    }
+
+    public async Task<RemovalUploadResultDto> UploadAsync(
+        IFormFile file,
+        string location,
+        string updatedBy,
+        CancellationToken cancellationToken = default)
+    {
+        if (file.Length == 0)
+            throw new InvalidOperationException("The Excel file is empty.");
+
+        if (string.IsNullOrWhiteSpace(location))
+            throw new InvalidOperationException(
+                "A removal location must be selected.");
+
+        var extension =
+            Path.GetExtension(file.FileName).ToLowerInvariant();
+
+        if (extension != ".xlsx")
+        {
+            throw new InvalidOperationException(
+                "Only .xlsx Excel files are supported.");
+        }
+
+        var validRows = new List<RemovalExcelRowDto>();
+        var errors = new List<RemovalUploadErrorDto>();
 
         using var stream = file.OpenReadStream();
-        using var workbook = new XLWorkbook(stream);
+        using var package = new ExcelPackage(stream);
 
-        var worksheet = workbook.Worksheets.First();
-        var headerRow = worksheet.FirstRowUsed();
+        var worksheet =
+            package.Workbook.Worksheets.FirstOrDefault();
 
-        if (headerRow == null)
-            throw new InvalidOperationException("Excel file is empty.");
+        if (worksheet?.Dimension == null)
+        {
+            throw new InvalidOperationException(
+                "The Excel workbook does not contain data.");
+        }
 
-        var headers = headerRow.CellsUsed()
-            .ToDictionary(
-                c => NormalizeHeader(c.GetString()),
-                c => c.Address.ColumnNumber
-            );
+        var headers = BuildHeaderMap(worksheet);
 
         ValidateHeaders(headers);
 
-        foreach (var row in worksheet.RowsUsed().Skip(1))
+        for (
+            var rowNumber = worksheet.Dimension.Start.Row + 1;
+            rowNumber <= worksheet.Dimension.End.Row;
+            rowNumber++)
         {
-            var rowNumber = row.RowNumber();
-            result.TotalRows++;
+            if (IsEmptyRow(worksheet, rowNumber))
+                continue;
 
             try
             {
-                var dto = new RemovalUploadRowDto
-                {
-                    Hull = GetCell(row, headers, "HULL"),
-                    Niin = GetCell(row, headers, "NIIN"),
-                    Apl = GetCell(row, headers, "APL"),
-                    PartNumber = GetCell(row, headers, "PARTNUMBER"),
-                    Erlid = ToDecimal(GetCell(row, headers, "ERLID")),
-                    Entered = GetCell(row, headers, "ENTERED"),
-                    Assigned = GetCell(row, headers, "ASSIGNED"),
-                    Removed = GetCell(row, headers, "REMOVED"),
-                    OnBoardLocation = GetCell(row, headers, "ONBOARDLOCATION"),
-                    FundCode = GetCell(row, headers, "FUNDCODE"),
-                    Dd1149 = GetCell(row, headers, "DD1149"),
-                    DateShip = ToDate(GetCell(row, headers, "DATESHIP")),
-                    Complete = GetCell(row, headers, "COMPLETE"),
-                    RemovedQty = ToDecimal(GetCell(row, headers, "REMOVEDQTY")),
-                    InaType = GetCell(row, headers, "INATYPE"),
-                    ShipToId = GetCell(row, headers, "SHIPTOID"),
-                    ErlComment = GetCell(row, headers, "ERLCOMMENT"),
-                    CasRepInd = GetCell(row, headers, "CASREPIND"),
-                    ShipYard = GetCell(row, headers, "SHIPYARD")
-                };
+                var row = ParseRow(
+                    worksheet,
+                    rowNumber,
+                    headers);
 
-                ValidateRow(dto, rowNumber);
+                ValidateRow(row, rowNumber);
 
-                var action = await _repository.UpsertRemovalUploadRowAsync(dto, updatedBy);
-
-                if (action == "UPDATED")
-                    result.UpdatedRows++;
-                else if (action == "NO_MATCH")
-                    result.NoMatchRows++;
-                else
-                    result.ErrorRows++;
-
-                result.RowResults.Add(new RemovalUploadRowResultDto
-                {
-                    RowNumber = rowNumber,
-                    Hull = dto.Hull,
-                    Niin = dto.Niin,
-                    Apl = dto.Apl,
-                    PartNumber = dto.PartNumber,
-                    Erlid = dto.Erlid,
-                    Action = action
-                });
+                validRows.Add(row);
             }
             catch (Exception ex)
             {
-                result.ErrorRows++;
-
-                result.RowResults.Add(new RemovalUploadRowResultDto
+                errors.Add(new RemovalUploadErrorDto
                 {
                     RowNumber = rowNumber,
-                    Action = "ERROR",
-                    ErrorMessage = ex.Message
+                    Message = ex.Message
                 });
             }
         }
 
-        return result;
+        if (validRows.Count == 0)
+        {
+            return new RemovalUploadResultDto
+            {
+                TotalRows = errors.Count,
+                InvalidRows = errors.Count,
+                Errors = errors
+            };
+        }
+
+        var databaseResult =
+            await _repository.ProcessUploadAsync(
+                location.Trim(),
+                updatedBy,
+                validRows,
+                cancellationToken);
+
+        databaseResult.TotalRows =
+            validRows.Count + errors.Count;
+
+        databaseResult.ValidRows = validRows.Count;
+        databaseResult.InvalidRows = errors.Count;
+        databaseResult.Errors = errors;
+
+        return databaseResult;
     }
 
-    private static void ValidateHeaders(Dictionary<string, int> headers)
+    private static RemovalExcelRowDto ParseRow(
+        ExcelWorksheet worksheet,
+        int rowNumber,
+        IReadOnlyDictionary<string, int> headers)
+    {
+        return new RemovalExcelRowDto
+        {
+            Hull = GetCell(
+                worksheet, rowNumber, headers, "HULL"),
+
+            Niin = GetCell(
+                worksheet, rowNumber, headers, "NIIN"),
+
+            Apl = GetCell(
+                worksheet, rowNumber, headers, "APL"),
+
+            PartNumber = GetCell(
+                worksheet, rowNumber, headers, "PARTNUMBER"),
+
+            Erlid = ToDecimal(
+                GetCell(
+                    worksheet, rowNumber, headers, "ERLID")),
+
+            Entered = GetCell(
+                worksheet, rowNumber, headers, "ENTERED"),
+
+            Assigned = GetCell(
+                worksheet, rowNumber, headers, "ASSIGNED"),
+
+            Removed = GetCell(
+                worksheet, rowNumber, headers, "REMOVED"),
+
+            OnBoardLocation = GetCell(
+                worksheet,
+                rowNumber,
+                headers,
+                "ONBOARDLOCATION"),
+
+            FundCode = GetCell(
+                worksheet, rowNumber, headers, "FUNDCODE"),
+
+            Dd1149 = GetCell(
+                worksheet, rowNumber, headers, "DD1149"),
+
+            DateShip = ToIsoDate(
+                worksheet,
+                rowNumber,
+                headers,
+                "DATESHIP"),
+
+            Complete = GetCell(
+                worksheet, rowNumber, headers, "COMPLETE"),
+
+            RemovedQty = ToDecimal(
+                GetCell(
+                    worksheet,
+                    rowNumber,
+                    headers,
+                    "REMOVEDQTY")),
+
+            InaType = GetCell(
+                worksheet, rowNumber, headers, "INATYPE"),
+
+            ShipToId = GetCell(
+                worksheet, rowNumber, headers, "SHIPTOID"),
+
+            ErlComment = GetCell(
+                worksheet, rowNumber, headers, "ERLCOMMENT"),
+
+            CasRepInd = GetCell(
+                worksheet, rowNumber, headers, "CASREPIND"),
+
+            ShipYard = GetCell(
+                worksheet, rowNumber, headers, "SHIPYARD")
+        };
+    }
+
+    private static Dictionary<string, int> BuildHeaderMap(
+        ExcelWorksheet worksheet)
+    {
+        var headers =
+            new Dictionary<string, int>(
+                StringComparer.OrdinalIgnoreCase);
+
+        var headerRow = worksheet.Dimension.Start.Row;
+
+        for (
+            var column = worksheet.Dimension.Start.Column;
+            column <= worksheet.Dimension.End.Column;
+            column++)
+        {
+            var rawHeader =
+                worksheet.Cells[headerRow, column]
+                    .Text
+                    .Trim();
+
+            if (string.IsNullOrWhiteSpace(rawHeader))
+                continue;
+
+            var normalized =
+                NormalizeHeader(rawHeader);
+
+            if (!headers.ContainsKey(normalized))
+                headers.Add(normalized, column);
+        }
+
+        return headers;
+    }
+
+    private static void ValidateHeaders(
+        IReadOnlyDictionary<string, int> headers)
     {
         var requiredHeaders = new[]
         {
@@ -166,45 +1521,108 @@ public class RemovalUploadService : IRemovalUploadService
         };
 
         var missing = requiredHeaders
-            .Where(h => !headers.ContainsKey(h))
-            .ToList();
+            .Where(header => !headers.ContainsKey(header))
+            .ToArray();
 
-        if (missing.Any())
-            throw new InvalidOperationException($"Missing required Excel headers: {string.Join(", ", missing)}");
+        if (missing.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Missing Excel headers: {string.Join(", ", missing)}");
+        }
     }
 
-    private static void ValidateRow(RemovalUploadRowDto row, int rowNumber)
+    private static void ValidateRow(
+        RemovalExcelRowDto row,
+        int rowNumber)
     {
         if (string.IsNullOrWhiteSpace(row.Hull))
-            throw new InvalidOperationException($"Row {rowNumber}: HULL is required.");
+            throw new InvalidOperationException(
+                $"Row {rowNumber}: HULL is required.");
 
         if (string.IsNullOrWhiteSpace(row.Niin))
-            throw new InvalidOperationException($"Row {rowNumber}: NIIN is required.");
+            throw new InvalidOperationException(
+                $"Row {rowNumber}: NIIN is required.");
 
         if (string.IsNullOrWhiteSpace(row.Apl))
-            throw new InvalidOperationException($"Row {rowNumber}: APL is required.");
+            throw new InvalidOperationException(
+                $"Row {rowNumber}: APL is required.");
 
         if (string.IsNullOrWhiteSpace(row.PartNumber))
-            throw new InvalidOperationException($"Row {rowNumber}: PART_NUMBER is required.");
+            throw new InvalidOperationException(
+                $"Row {rowNumber}: PART_NUMBER is required.");
     }
 
-    private static string NormalizeHeader(string value)
+    private static bool IsEmptyRow(
+        ExcelWorksheet worksheet,
+        int rowNumber)
     {
-        return value
-            .Replace(" ", "")
-            .Replace("_", "")
-            .Replace("-", "")
-            .Trim()
-            .ToUpperInvariant();
+        for (
+            var column = worksheet.Dimension.Start.Column;
+            column <= worksheet.Dimension.End.Column;
+            column++)
+        {
+            if (!string.IsNullOrWhiteSpace(
+                    worksheet.Cells[rowNumber, column].Text))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    private static string? GetCell(IXLRow row, Dictionary<string, int> headers, string headerKey)
+    private static string? GetCell(
+        ExcelWorksheet worksheet,
+        int rowNumber,
+        IReadOnlyDictionary<string, int> headers,
+        string header)
     {
-        if (!headers.TryGetValue(headerKey, out var col))
+        if (!headers.TryGetValue(header, out var column))
             return null;
 
-        var value = row.Cell(col).GetFormattedString()?.Trim();
-        return string.IsNullOrWhiteSpace(value) ? null : value;
+        var value =
+            worksheet.Cells[rowNumber, column]
+                .Text
+                .Trim();
+
+        return string.IsNullOrWhiteSpace(value)
+            ? null
+            : value;
+    }
+
+    private static string? ToIsoDate(
+        ExcelWorksheet worksheet,
+        int rowNumber,
+        IReadOnlyDictionary<string, int> headers,
+        string header)
+    {
+        if (!headers.TryGetValue(header, out var column))
+            return null;
+
+        var cell = worksheet.Cells[rowNumber, column];
+
+        if (cell.Value is DateTime dateValue)
+            return dateValue.ToString("yyyy-MM-dd");
+
+        var text = cell.Text.Trim();
+
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+
+        if (DateTime.TryParse(
+                text,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var parsed))
+        {
+            return parsed.ToString("yyyy-MM-dd");
+        }
+
+        if (DateTime.TryParse(text, out parsed))
+            return parsed.ToString("yyyy-MM-dd");
+
+        throw new InvalidOperationException(
+            $"Row {rowNumber}: DateShip '{text}' is not a valid date.");
     }
 
     private static decimal? ToDecimal(string? value)
@@ -212,151 +1630,480 @@ public class RemovalUploadService : IRemovalUploadService
         if (string.IsNullOrWhiteSpace(value))
             return null;
 
-        value = value.Trim();
+        var normalized = value.Trim();
 
-        if (value.EndsWith(".00"))
-            value = value[..^3];
+        if (normalized.EndsWith(".00"))
+            normalized = normalized[..^3];
 
-        return decimal.TryParse(value, out var result)
+        return decimal.TryParse(
+            normalized,
+            NumberStyles.Any,
+            CultureInfo.InvariantCulture,
+            out var result)
             ? result
-            : null;
+            : throw new InvalidOperationException(
+                $"'{value}' is not a valid number.");
     }
 
-    private static DateTime? ToDate(string? value)
+    private static string NormalizeHeader(string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-            return null;
-
-        return DateTime.TryParse(value, out var result)
-            ? result
-            : null;
+        return new string(
+            value
+                .Where(char.IsLetterOrDigit)
+                .Select(char.ToUpperInvariant)
+                .ToArray());
     }
 }
 
+-----
+using Pht.Api.RemovalStatus.Dtos;
 
+namespace Pht.Api.RemovalStatus.Services;
 
-
-using PHTool.Api.Dtos;
-
-namespace PHTool.Api.Services;
-
-public interface IRemovalUploadService
+public interface IRemovalStatusService
 {
-    Task<RemovalUploadResultDto> UploadRemovalExcelAsync(IFormFile file, string updatedBy);
+    Task<IReadOnlyList<string>> GetLocationsAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<RemovalDashboardDto> GetDashboardAsync(
+        string? location,
+        CancellationToken cancellationToken = default);
+
+    Task<PagedResultDto<RemovalGridRowDto>> GetGridAsync(
+        string? location,
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    Task<RemovalUploadResultDto> UploadAsync(
+        IFormFile file,
+        string location,
+        string updatedBy,
+        CancellationToken cancellationToken = default);
 }
 
 
+----------------------------
 
 using System.Data;
+using System.Text.Json;
 using Oracle.ManagedDataAccess.Client;
-using PHTool.Api.Dtos;
+using Oracle.ManagedDataAccess.Types;
+using Pht.Api.RemovalStatus.Dtos;
 
-namespace PHTool.Api.Data;
+namespace Pht.Api.RemovalStatus.Data;
 
-public class RemovalUploadRepository : IRemovalUploadRepository
+public sealed class RemovalStatusRepository : IRemovalStatusRepository
 {
     private readonly IConfiguration _configuration;
 
-    public RemovalUploadRepository(IConfiguration configuration)
+    public RemovalStatusRepository(IConfiguration configuration)
     {
         _configuration = configuration;
     }
 
-    private OracleConnection GetConnection()
+    private OracleConnection CreateConnection()
     {
-        return new OracleConnection(_configuration.GetConnectionString("OracleDb"));
+        var connectionString =
+            _configuration.GetConnectionString("OracleDb")
+            ?? throw new InvalidOperationException(
+                "OracleDb connection string is missing.");
+
+        return new OracleConnection(connectionString);
     }
 
-    public async Task<string> UpsertRemovalUploadRowAsync(RemovalUploadRowDto row, string updatedBy)
+    public async Task<IReadOnlyList<string>> GetLocationsAsync(
+        CancellationToken cancellationToken = default)
     {
-        await using var conn = GetConnection();
-        await conn.OpenAsync();
+        var results = new List<string>();
 
-        await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "PRTHRVST.PKG_PHT_REMOVAL_UPLOAD.UPSERT_REMOVAL_UPLOAD_ROW";
-        cmd.CommandType = CommandType.StoredProcedure;
-        cmd.BindByName = true;
+        await using var connection = CreateConnection();
+        await connection.OpenAsync(cancellationToken);
 
-        cmd.Parameters.Add("P_HULL", OracleDbType.Varchar2).Value = (object?)row.Hull ?? DBNull.Value;
-        cmd.Parameters.Add("P_NIIN", OracleDbType.Varchar2).Value = (object?)row.Niin ?? DBNull.Value;
-        cmd.Parameters.Add("P_APL", OracleDbType.Varchar2).Value = (object?)row.Apl ?? DBNull.Value;
-        cmd.Parameters.Add("P_PART_NUMBER", OracleDbType.Varchar2).Value = (object?)row.PartNumber ?? DBNull.Value;
-        cmd.Parameters.Add("P_ERLID", OracleDbType.Decimal).Value = (object?)row.Erlid ?? DBNull.Value;
-        cmd.Parameters.Add("P_ENTERED", OracleDbType.Varchar2).Value = (object?)row.Entered ?? DBNull.Value;
-        cmd.Parameters.Add("P_ASSIGNED", OracleDbType.Varchar2).Value = (object?)row.Assigned ?? DBNull.Value;
-        cmd.Parameters.Add("P_REMOVED", OracleDbType.Varchar2).Value = (object?)row.Removed ?? DBNull.Value;
-        cmd.Parameters.Add("P_ONBOARD_LOCATION", OracleDbType.Varchar2).Value = (object?)row.OnBoardLocation ?? DBNull.Value;
-        cmd.Parameters.Add("P_FUND_CODE", OracleDbType.Varchar2).Value = (object?)row.FundCode ?? DBNull.Value;
-        cmd.Parameters.Add("P_DD1149", OracleDbType.Varchar2).Value = (object?)row.Dd1149 ?? DBNull.Value;
-        cmd.Parameters.Add("P_DATE_SHIP", OracleDbType.Date).Value = (object?)row.DateShip ?? DBNull.Value;
-        cmd.Parameters.Add("P_COMPLETE", OracleDbType.Varchar2).Value = (object?)row.Complete ?? DBNull.Value;
-        cmd.Parameters.Add("P_REMOVED_QTY", OracleDbType.Decimal).Value = (object?)row.RemovedQty ?? DBNull.Value;
-        cmd.Parameters.Add("P_INA_TYPE", OracleDbType.Varchar2).Value = (object?)row.InaType ?? DBNull.Value;
-        cmd.Parameters.Add("P_SHIP_TO_ID", OracleDbType.Varchar2).Value = (object?)row.ShipToId ?? DBNull.Value;
-        cmd.Parameters.Add("P_ERL_COMMENT", OracleDbType.Varchar2).Value = (object?)row.ErlComment ?? DBNull.Value;
-        cmd.Parameters.Add("P_CAS_REP_IND", OracleDbType.Varchar2).Value = (object?)row.CasRepInd ?? DBNull.Value;
-        cmd.Parameters.Add("P_SHIPYARD", OracleDbType.Varchar2).Value = (object?)row.ShipYard ?? DBNull.Value;
-        cmd.Parameters.Add("P_UPDATED_BY", OracleDbType.Varchar2).Value = updatedBy;
+        await using var command = connection.CreateCommand();
+        command.BindByName = true;
+        command.CommandType = CommandType.StoredProcedure;
+        command.CommandText =
+            "PRTHRVST.PKG_PHT_REMOVAL_STATUS.GET_LOCATIONS";
 
-        var actionParam = new OracleParameter("O_ACTION", OracleDbType.Varchar2, 50)
+        command.Parameters.Add(
+            "O_CURSOR",
+            OracleDbType.RefCursor,
+            ParameterDirection.Output);
+
+        await using var reader =
+            await command.ExecuteReaderAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
         {
-            Direction = ParameterDirection.Output
+            results.Add(reader["LOCATION"]?.ToString() ?? string.Empty);
+        }
+
+        return results;
+    }
+
+    public async Task<RemovalSummaryDto> GetSummaryAsync(
+        string? location,
+        CancellationToken cancellationToken = default)
+    {
+        await using var connection = CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = connection.CreateCommand();
+        command.BindByName = true;
+        command.CommandType = CommandType.StoredProcedure;
+        command.CommandText =
+            "PRTHRVST.PKG_PHT_REMOVAL_STATUS.GET_SUMMARY";
+
+        command.Parameters.Add(
+            "P_LOCATION",
+            OracleDbType.Varchar2).Value =
+            DbValue(location);
+
+        command.Parameters.Add(
+            "O_CURSOR",
+            OracleDbType.RefCursor,
+            ParameterDirection.Output);
+
+        await using var reader =
+            await command.ExecuteReaderAsync(cancellationToken);
+
+        if (!await reader.ReadAsync(cancellationToken))
+            return new RemovalSummaryDto();
+
+        return new RemovalSummaryDto
+        {
+            TotalStocked = ToInt(reader["TOTAL_STOCKED"]),
+            RemovedShipped = ToInt(reader["REMOVED_SHIPPED"]),
+            Completed = ToInt(reader["COMPLETED"]),
+            InProcess = ToInt(reader["IN_PROCESS"])
         };
+    }
 
-        cmd.Parameters.Add(actionParam);
+    public async Task<IReadOnlyList<LocationBreakdownDto>>
+        GetLocationBreakdownAsync(
+            CancellationToken cancellationToken = default)
+    {
+        var results = new List<LocationBreakdownDto>();
 
-        await cmd.ExecuteNonQueryAsync();
+        await using var connection = CreateConnection();
+        await connection.OpenAsync(cancellationToken);
 
-        return actionParam.Value?.ToString() ?? "UNKNOWN";
+        await using var command = connection.CreateCommand();
+        command.BindByName = true;
+        command.CommandType = CommandType.StoredProcedure;
+        command.CommandText =
+            "PRTHRVST.PKG_PHT_REMOVAL_STATUS.GET_LOCATION_BREAKDOWN";
+
+        command.Parameters.Add(
+            "O_CURSOR",
+            OracleDbType.RefCursor,
+            ParameterDirection.Output);
+
+        await using var reader =
+            await command.ExecuteReaderAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            results.Add(new LocationBreakdownDto
+            {
+                Location = reader["LOCATION"]?.ToString() ?? "Unassigned",
+                ItemCount = ToInt(reader["ITEM_COUNT"])
+            });
+        }
+
+        return results;
+    }
+
+    public async Task<PagedResultDto<RemovalGridRowDto>> GetGridAsync(
+        string? location,
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var results = new List<RemovalGridRowDto>();
+
+        page = Math.Max(page, 1);
+        pageSize = Math.Clamp(pageSize, 1, 500);
+
+        var offset = (page - 1) * pageSize;
+
+        await using var connection = CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = connection.CreateCommand();
+        command.BindByName = true;
+        command.CommandType = CommandType.StoredProcedure;
+        command.CommandText =
+            "PRTHRVST.PKG_PHT_REMOVAL_STATUS.GET_GRID";
+
+        command.Parameters.Add(
+            "P_LOCATION",
+            OracleDbType.Varchar2).Value =
+            DbValue(location);
+
+        command.Parameters.Add(
+            "P_SEARCH",
+            OracleDbType.Varchar2).Value =
+            DbValue(search);
+
+        command.Parameters.Add(
+            "P_OFFSET",
+            OracleDbType.Int32).Value = offset;
+
+        command.Parameters.Add(
+            "P_PAGE_SIZE",
+            OracleDbType.Int32).Value = pageSize;
+
+        var totalParameter = command.Parameters.Add(
+            "O_TOTAL",
+            OracleDbType.Int32);
+
+        totalParameter.Direction = ParameterDirection.Output;
+
+        command.Parameters.Add(
+            "O_CURSOR",
+            OracleDbType.RefCursor,
+            ParameterDirection.Output);
+
+        await using var reader =
+            await command.ExecuteReaderAsync(cancellationToken);
+
+        while (await reader.ReadAsync(cancellationToken))
+        {
+            results.Add(MapGridRow(reader));
+        }
+
+        return new PagedResultDto<RemovalGridRowDto>
+        {
+            TotalCount = ToInt(totalParameter.Value),
+            Items = results
+        };
+    }
+
+    public async Task<RemovalUploadResultDto> ProcessUploadAsync(
+        string location,
+        string updatedBy,
+        IReadOnlyList<RemovalExcelRowDto> rows,
+        CancellationToken cancellationToken = default)
+    {
+        var json = JsonSerializer.Serialize(
+            rows,
+            new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
+
+        await using var connection = CreateConnection();
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = connection.CreateCommand();
+        command.BindByName = true;
+        command.CommandType = CommandType.StoredProcedure;
+        command.CommandText =
+            "PRTHRVST.PKG_PHT_REMOVAL_STATUS.PROCESS_EXCEL_UPLOAD";
+
+        command.Parameters.Add(
+            "P_LOCATION",
+            OracleDbType.Varchar2).Value = location;
+
+        command.Parameters.Add(
+            "P_UPDATED_BY",
+            OracleDbType.Varchar2).Value = updatedBy;
+
+        command.Parameters.Add(
+            "P_ROWS_JSON",
+            OracleDbType.Clob).Value = json;
+
+        var totalParameter = command.Parameters.Add(
+            "O_TOTAL_ROWS",
+            OracleDbType.Int32);
+
+        totalParameter.Direction = ParameterDirection.Output;
+
+        var updatedParameter = command.Parameters.Add(
+            "O_UPDATED_ROWS",
+            OracleDbType.Int32);
+
+        updatedParameter.Direction = ParameterDirection.Output;
+
+        var noMatchParameter = command.Parameters.Add(
+            "O_NO_MATCH_ROWS",
+            OracleDbType.Int32);
+
+        noMatchParameter.Direction = ParameterDirection.Output;
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+
+        return new RemovalUploadResultDto
+        {
+            TotalRows = ToInt(totalParameter.Value),
+            ValidRows = rows.Count,
+            UpdatedRows = ToInt(updatedParameter.Value),
+            NoMatchRows = ToInt(noMatchParameter.Value)
+        };
+    }
+
+    private static RemovalGridRowDto MapGridRow(
+        OracleDataReader reader)
+    {
+        return new RemovalGridRowDto
+        {
+            Id = ToDecimal(reader["ID"]),
+            Hull = ToText(reader["HULL_ID"]),
+            Niin = ToText(reader["NIIN_ID"]),
+            Apl = ToText(reader["APL"]),
+            PartNumber = ToText(reader["PART_NUMBER"]),
+            Erlid = ToNullableDecimal(reader["ERLID"]),
+            Entered = ToText(reader["ENTERED"]),
+            Assigned = ToText(reader["ASSIGNED"]),
+            Removed = ToText(reader["REMOVED"]),
+            OnBoardLocation = ToText(reader["ONBOARD_LOCATION"]),
+            FundCode = ToText(reader["FUND_CODE"]),
+            Dd1149 = ToText(reader["DD1149"]),
+            DateShip = ToNullableDate(reader["DATE_SHIP"]),
+            Complete = ToText(reader["COMPLETE"]),
+            RemovedQty = ToNullableDecimal(reader["REMOVED_QTY"]),
+            InaType = ToText(reader["INA_TYPE"]),
+            ShipToId = ToText(reader["SHIP_TO_ID"]),
+            ErlComment = ToText(reader["ERL_COMMENT"]),
+            CasRepInd = ToText(reader["CAS_REP_IND"]),
+            ShipYard = ToText(reader["SHIPYARD"]),
+            RemovalLocation = ToText(reader["REMOVAL_LOCATION"])
+        };
+    }
+
+    private static object DbValue(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? DBNull.Value
+            : value.Trim();
+    }
+
+    private static string? ToText(object value)
+    {
+        return value == DBNull.Value ? null : value.ToString();
+    }
+
+    private static int ToInt(object value)
+    {
+        if (value is null || value == DBNull.Value)
+            return 0;
+
+        if (value is OracleDecimal oracleDecimal)
+            return oracleDecimal.IsNull
+                ? 0
+                : oracleDecimal.ToInt32();
+
+        return Convert.ToInt32(value);
+    }
+
+    private static decimal ToDecimal(object value)
+    {
+        return value == DBNull.Value
+            ? 0
+            : Convert.ToDecimal(value);
+    }
+
+    private static decimal? ToNullableDecimal(object value)
+    {
+        return value == DBNull.Value
+            ? null
+            : Convert.ToDecimal(value);
+    }
+
+    private static DateTime? ToNullableDate(object value)
+    {
+        return value == DBNull.Value
+            ? null
+            : Convert.ToDateTime(value);
     }
 }
 
+-----------------------
+using Pht.Api.RemovalStatus.Dtos;
 
+namespace Pht.Api.RemovalStatus.Data;
 
-
-using PHTool.Api.Dtos;
-
-namespace PHTool.Api.Data;
-
-public interface IRemovalUploadRepository
+public interface IRemovalStatusRepository
 {
-    Task<string> UpsertRemovalUploadRowAsync(RemovalUploadRowDto row, string updatedBy);
+    Task<IReadOnlyList<string>> GetLocationsAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<RemovalSummaryDto> GetSummaryAsync(
+        string? location,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<LocationBreakdownDto>> GetLocationBreakdownAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<PagedResultDto<RemovalGridRowDto>> GetGridAsync(
+        string? location,
+        string? search,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    Task<RemovalUploadResultDto> ProcessUploadAsync(
+        string location,
+        string updatedBy,
+        IReadOnlyList<RemovalExcelRowDto> rows,
+        CancellationToken cancellationToken = default);
 }
 
 
+----------------------------------
+namespace Pht.Api.RemovalStatus.Dtos;
 
-
-namespace PHTool.Api.Dtos;
-
-public class RemovalUploadRowResultDto
+public sealed class RemovalUploadErrorDto
 {
     public int RowNumber { get; set; }
-    public string? Hull { get; set; }
-    public string? Niin { get; set; }
-    public string? Apl { get; set; }
-    public string? PartNumber { get; set; }
-    public decimal? Erlid { get; set; }
-    public string Action { get; set; } = "";
-    public string? ErrorMessage { get; set; }
+    public string Message { get; set; } = string.Empty;
 }
 
-namespace PHTool.Api.Dtos;
+------------------------------------
+namespace Pht.Api.RemovalStatus.Dtos;
 
-public class RemovalUploadResultDto
+public sealed class RemovalUploadResultDto
 {
     public int TotalRows { get; set; }
+    public int ValidRows { get; set; }
+    public int InvalidRows { get; set; }
     public int UpdatedRows { get; set; }
     public int NoMatchRows { get; set; }
-    public int ErrorRows { get; set; }
 
-    public List<RemovalUploadRowResultDto> RowResults { get; set; } = new();
+    public List<RemovalUploadErrorDto> Errors { get; set; } = [];
+}
+
+----------------
+namespace Pht.Api.RemovalStatus.Dtos;
+
+public sealed class RemovalDashboardDto
+{
+    public RemovalSummaryDto Summary { get; set; } = new();
+    public IReadOnlyList<LocationBreakdownDto> LocationBreakdown { get; set; } = [];
 }
 
 
-namespace PHTool.Api.Dtos;
+------------------
 
-public class RemovalUploadRowDto
+namespace Pht.Api.RemovalStatus.Dtos;
+
+public sealed class RemovalDashboardDto
 {
+    public RemovalSummaryDto Summary { get; set; } = new();
+    public IReadOnlyList<LocationBreakdownDto> LocationBreakdown { get; set; } = [];
+}
+
+
+---------------------
+namespace Pht.Api.RemovalStatus.Dtos;
+
+public sealed class RemovalGridRowDto
+{
+    public decimal Id { get; set; }
     public string? Hull { get; set; }
     public string? Niin { get; set; }
     public string? Apl { get; set; }
@@ -376,116 +2123,440 @@ public class RemovalUploadRowDto
     public string? ErlComment { get; set; }
     public string? CasRepInd { get; set; }
     public string? ShipYard { get; set; }
+    public string? RemovalLocation { get; set; }
+}
+
+--------------------
+namespace Pht.Api.RemovalStatus.Dtos;
+
+public sealed class LocationBreakdownDto
+{
+    public string Location { get; set; } = string.Empty;
+    public int ItemCount { get; set; }
+}
+
+---------
+namespace Pht.Api.RemovalStatus.Dtos;
+
+public sealed class RemovalSummaryDto
+{
+    public int TotalStocked { get; set; }
+    public int RemovedShipped { get; set; }
+    public int Completed { get; set; }
+    public int InProcess { get; set; }
+}
+
+-----------------
+namespace Pht.Api.RemovalStatus.Dtos;
+
+public sealed class RemovalSummaryDto
+{
+    public int TotalStocked { get; set; }
+    public int RemovedShipped { get; set; }
+    public int Completed { get; set; }
+    public int InProcess { get; set; }
 }
 
 
+------------------
+namespace Pht.Api.RemovalStatus.Dtos;
+
+public sealed class RemovalExcelRowDto
+{
+    public string? Hull { get; set; }
+    public string? Niin { get; set; }
+    public string? Apl { get; set; }
+    public string? PartNumber { get; set; }
+    public decimal? Erlid { get; set; }
+    public string? Entered { get; set; }
+    public string? Assigned { get; set; }
+    public string? Removed { get; set; }
+    public string? OnBoardLocation { get; set; }
+    public string? FundCode { get; set; }
+    public string? Dd1149 { get; set; }
+    public string? DateShip { get; set; }
+    public string? Complete { get; set; }
+    public decimal? RemovedQty { get; set; }
+    public string? InaType { get; set; }
+    public string? ShipToId { get; set; }
+    public string? ErlComment { get; set; }
+    public string? CasRepInd { get; set; }
+    public string? ShipYard { get; set; }
+}
 
 
-CREATE OR REPLACE PACKAGE BODY PRTHRVST.PKG_PHT_REMOVAL_UPLOAD AS
+-----------------
 
-    PROCEDURE UPSERT_REMOVAL_UPLOAD_ROW (
-        P_HULL              IN VARCHAR2,
-        P_NIIN              IN VARCHAR2,
-        P_APL               IN VARCHAR2,
-        P_PART_NUMBER       IN VARCHAR2,
-        P_ERLID             IN NUMBER,
-        P_ENTERED           IN VARCHAR2,
-        P_ASSIGNED          IN VARCHAR2,
-        P_REMOVED           IN VARCHAR2,
-        P_ONBOARD_LOCATION  IN VARCHAR2,
-        P_FUND_CODE         IN VARCHAR2,
-        P_DD1149            IN VARCHAR2,
-        P_DATE_SHIP         IN DATE,
-        P_COMPLETE          IN VARCHAR2,
-        P_REMOVED_QTY       IN NUMBER,
-        P_INA_TYPE          IN VARCHAR2,
-        P_SHIP_TO_ID        IN VARCHAR2,
-        P_ERL_COMMENT       IN VARCHAR2,
-        P_CAS_REP_IND       IN VARCHAR2,
-        P_SHIPYARD          IN VARCHAR2,
-        P_UPDATED_BY        IN VARCHAR2,
-        O_ACTION            OUT VARCHAR2
+
+CREATE OR REPLACE PACKAGE BODY PRTHRVST.PKG_PHT_REMOVAL_STATUS AS
+
+    PROCEDURE GET_LOCATIONS (
+        O_CURSOR OUT SYS_REFCURSOR
     ) AS
-        V_ID NUMBER;
     BEGIN
-        BEGIN
-            SELECT ID
-            INTO V_ID
+        OPEN O_CURSOR FOR
+            SELECT DISTINCT REMOVAL_LOCATION AS LOCATION
             FROM PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION
-            WHERE TO_CHAR(HULL_ID) = TRIM(P_HULL)
-              AND TO_CHAR(NIIN_ID) = TRIM(P_NIIN)
-              AND NVL(TRIM(APL), 'X') = NVL(TRIM(P_APL), 'X')
-              AND NVL(TRIM(PART_NUMBER), 'X') = NVL(TRIM(P_PART_NUMBER), 'X')
-              AND IS_DELETED = 0
-            FETCH FIRST 1 ROW ONLY;
+            WHERE IS_DELETED = 0
+              AND REMOVAL_LOCATION IS NOT NULL
+            ORDER BY REMOVAL_LOCATION;
+    END GET_LOCATIONS;
 
-            UPDATE PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION
-            SET
-                ERLID = P_ERLID,
-                ENTERED = P_ENTERED,
-                ASSIGNED = P_ASSIGNED,
-                REMOVED = P_REMOVED,
-                ONBOARD_LOCATION = P_ONBOARD_LOCATION,
-                FUND_CODE = P_FUND_CODE,
-                DD1149 = P_DD1149,
-                DATE_SHIP = P_DATE_SHIP,
-                COMPLETE = P_COMPLETE,
-                REMOVED_QTY = P_REMOVED_QTY,
-                INA_TYPE = P_INA_TYPE,
-                SHIP_TO_ID = P_SHIP_TO_ID,
-                ERL_COMMENT = P_ERL_COMMENT,
-                CAS_REP_IND = P_CAS_REP_IND,
-                SHIPYARD = P_SHIPYARD,
-                STATUS =
+
+    PROCEDURE GET_SUMMARY (
+        P_LOCATION IN VARCHAR2,
+        O_CURSOR   OUT SYS_REFCURSOR
+    ) AS
+    BEGIN
+        OPEN O_CURSOR FOR
+            SELECT
+                COUNT(*) AS TOTAL_STOCKED,
+
+                SUM(
                     CASE
-                        WHEN UPPER(NVL(P_COMPLETE, 'N')) IN ('Y', 'YES', 'TRUE', 'COMPLETE')
-                          OR UPPER(NVL(P_REMOVED, 'N')) IN ('Y', 'YES', 'TRUE', 'REMOVED')
-                        THEN 'Removed'
-                        ELSE STATUS
+                        WHEN UPPER(NVL(REMOVED, 'N'))
+                             IN ('Y', 'YES', 'REMOVED', 'SHIPPED')
+                          OR DATE_SHIP IS NOT NULL
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS REMOVED_SHIPPED,
+
+                SUM(
+                    CASE
+                        WHEN UPPER(NVL(COMPLETE, 'N'))
+                             IN ('Y', 'YES', 'TRUE', 'COMPLETE')
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS COMPLETED,
+
+                SUM(
+                    CASE
+                        WHEN UPPER(NVL(REMOVED, 'N'))
+                             NOT IN ('Y', 'YES', 'REMOVED', 'SHIPPED')
+                         AND DATE_SHIP IS NULL
+                         AND UPPER(NVL(COMPLETE, 'N'))
+                             NOT IN ('Y', 'YES', 'TRUE', 'COMPLETE')
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS IN_PROCESS
+
+            FROM PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION
+            WHERE IS_DELETED = 0
+              AND (
+                    P_LOCATION IS NULL
+                    OR REMOVAL_LOCATION = P_LOCATION
+                  );
+    END GET_SUMMARY;
+
+
+    PROCEDURE GET_LOCATION_BREAKDOWN (
+        O_CURSOR OUT SYS_REFCURSOR
+    ) AS
+    BEGIN
+        OPEN O_CURSOR FOR
+            SELECT
+                NVL(REMOVAL_LOCATION, 'Unassigned') AS LOCATION,
+                COUNT(*) AS ITEM_COUNT
+            FROM PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION
+            WHERE IS_DELETED = 0
+            GROUP BY NVL(REMOVAL_LOCATION, 'Unassigned')
+            ORDER BY ITEM_COUNT DESC;
+    END GET_LOCATION_BREAKDOWN;
+
+
+    PROCEDURE GET_GRID (
+        P_LOCATION  IN VARCHAR2,
+        P_SEARCH    IN VARCHAR2,
+        P_OFFSET    IN NUMBER,
+        P_PAGE_SIZE IN NUMBER,
+        O_TOTAL     OUT NUMBER,
+        O_CURSOR    OUT SYS_REFCURSOR
+    ) AS
+    BEGIN
+        SELECT COUNT(*)
+        INTO O_TOTAL
+        FROM PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION T
+        WHERE T.IS_DELETED = 0
+          AND (
+                P_LOCATION IS NULL
+                OR T.REMOVAL_LOCATION = P_LOCATION
+              )
+          AND (
+                P_SEARCH IS NULL
+                OR UPPER(TO_CHAR(T.ERLID)) LIKE '%' || UPPER(P_SEARCH) || '%'
+                OR UPPER(TO_CHAR(T.HULL_ID)) LIKE '%' || UPPER(P_SEARCH) || '%'
+                OR UPPER(TO_CHAR(T.NIIN_ID)) LIKE '%' || UPPER(P_SEARCH) || '%'
+                OR UPPER(T.APL) LIKE '%' || UPPER(P_SEARCH) || '%'
+                OR UPPER(T.PART_NUMBER) LIKE '%' || UPPER(P_SEARCH) || '%'
+                OR UPPER(T.ONBOARD_LOCATION) LIKE '%' || UPPER(P_SEARCH) || '%'
+                OR UPPER(T.ERL_COMMENT) LIKE '%' || UPPER(P_SEARCH) || '%'
+              );
+
+        OPEN O_CURSOR FOR
+            SELECT
+                T.ID,
+                T.HULL_ID,
+                T.NIIN_ID,
+                T.APL,
+                T.PART_NUMBER,
+                T.ERLID,
+                T.ENTERED,
+                T.ASSIGNED,
+                T.REMOVED,
+                T.ONBOARD_LOCATION,
+                T.FUND_CODE,
+                T.DD1149,
+                T.DATE_SHIP,
+                T.COMPLETE,
+                T.REMOVED_QTY,
+                T.INA_TYPE,
+                T.SHIP_TO_ID,
+                T.ERL_COMMENT,
+                T.CAS_REP_IND,
+                T.SHIPYARD,
+                T.REMOVAL_LOCATION
+            FROM PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION T
+            WHERE T.IS_DELETED = 0
+              AND (
+                    P_LOCATION IS NULL
+                    OR T.REMOVAL_LOCATION = P_LOCATION
+                  )
+              AND (
+                    P_SEARCH IS NULL
+                    OR UPPER(TO_CHAR(T.ERLID)) LIKE '%' || UPPER(P_SEARCH) || '%'
+                    OR UPPER(TO_CHAR(T.HULL_ID)) LIKE '%' || UPPER(P_SEARCH) || '%'
+                    OR UPPER(TO_CHAR(T.NIIN_ID)) LIKE '%' || UPPER(P_SEARCH) || '%'
+                    OR UPPER(T.APL) LIKE '%' || UPPER(P_SEARCH) || '%'
+                    OR UPPER(T.PART_NUMBER) LIKE '%' || UPPER(P_SEARCH) || '%'
+                    OR UPPER(T.ONBOARD_LOCATION) LIKE '%' || UPPER(P_SEARCH) || '%'
+                    OR UPPER(T.ERL_COMMENT) LIKE '%' || UPPER(P_SEARCH) || '%'
+                  )
+            ORDER BY T.ERLID
+            OFFSET NVL(P_OFFSET, 0) ROWS
+            FETCH NEXT NVL(P_PAGE_SIZE, 50) ROWS ONLY;
+    END GET_GRID;
+
+
+    PROCEDURE PROCESS_EXCEL_UPLOAD (
+        P_LOCATION      IN VARCHAR2,
+        P_UPDATED_BY    IN VARCHAR2,
+        P_ROWS_JSON     IN CLOB,
+        O_TOTAL_ROWS    OUT NUMBER,
+        O_UPDATED_ROWS  OUT NUMBER,
+        O_NO_MATCH_ROWS OUT NUMBER
+    ) AS
+    BEGIN
+        SELECT COUNT(*)
+        INTO O_TOTAL_ROWS
+        FROM JSON_TABLE(
+            P_ROWS_JSON,
+            '$[*]'
+            COLUMNS (
+                HULL        VARCHAR2(100) PATH '$.hull',
+                NIIN        VARCHAR2(100) PATH '$.niin',
+                APL         VARCHAR2(100) PATH '$.apl',
+                PART_NUMBER VARCHAR2(200) PATH '$.partNumber'
+            )
+        );
+
+        SELECT COUNT(*)
+        INTO O_NO_MATCH_ROWS
+        FROM JSON_TABLE(
+            P_ROWS_JSON,
+            '$[*]'
+            COLUMNS (
+                HULL        VARCHAR2(100) PATH '$.hull',
+                NIIN        VARCHAR2(100) PATH '$.niin',
+                APL         VARCHAR2(100) PATH '$.apl',
+                PART_NUMBER VARCHAR2(200) PATH '$.partNumber'
+            )
+        ) S
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION T
+            WHERE T.IS_DELETED = 0
+              AND TRIM(TO_CHAR(T.HULL_ID)) = TRIM(S.HULL)
+              AND TRIM(TO_CHAR(T.NIIN_ID)) = TRIM(S.NIIN)
+              AND UPPER(TRIM(NVL(T.APL, 'X')))
+                    = UPPER(TRIM(NVL(S.APL, 'X')))
+              AND UPPER(TRIM(NVL(T.PART_NUMBER, 'X')))
+                    = UPPER(TRIM(NVL(S.PART_NUMBER, 'X')))
+        );
+
+        MERGE INTO PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION T
+        USING (
+            SELECT *
+            FROM (
+                SELECT
+                    J.*,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY
+                            TRIM(HULL),
+                            TRIM(NIIN),
+                            UPPER(TRIM(APL)),
+                            UPPER(TRIM(PART_NUMBER))
+                        ORDER BY ERLID
+                    ) AS RN
+                FROM JSON_TABLE(
+                    P_ROWS_JSON,
+                    '$[*]'
+                    COLUMNS (
+                        HULL               VARCHAR2(100)  PATH '$.hull',
+                        NIIN               VARCHAR2(100)  PATH '$.niin',
+                        APL                VARCHAR2(100)  PATH '$.apl',
+                        PART_NUMBER        VARCHAR2(200)  PATH '$.partNumber',
+                        ERLID              NUMBER         PATH '$.erlid',
+                        ENTERED            VARCHAR2(100)  PATH '$.entered',
+                        ASSIGNED           VARCHAR2(100)  PATH '$.assigned',
+                        REMOVED            VARCHAR2(30)   PATH '$.removed',
+                        ONBOARD_LOCATION   VARCHAR2(200)  PATH '$.onBoardLocation',
+                        FUND_CODE          VARCHAR2(100)  PATH '$.fundCode',
+                        DD1149             VARCHAR2(100)  PATH '$.dd1149',
+                        DATE_SHIP_TEXT     VARCHAR2(50)   PATH '$.dateShip',
+                        COMPLETE           VARCHAR2(30)   PATH '$.complete',
+                        REMOVED_QTY        NUMBER         PATH '$.removedQty',
+                        INA_TYPE           VARCHAR2(100)  PATH '$.inaType',
+                        SHIP_TO_ID         VARCHAR2(100)  PATH '$.shipToId',
+                        ERL_COMMENT        VARCHAR2(2000) PATH '$.erlComment',
+                        CAS_REP_IND        VARCHAR2(50)   PATH '$.casRepInd',
+                        SHIPYARD           VARCHAR2(200)  PATH '$.shipYard'
+                    )
+                ) J
+            )
+            WHERE RN = 1
+        ) S
+        ON (
+            TRIM(TO_CHAR(T.HULL_ID)) = TRIM(S.HULL)
+            AND TRIM(TO_CHAR(T.NIIN_ID)) = TRIM(S.NIIN)
+            AND UPPER(TRIM(NVL(T.APL, 'X')))
+                = UPPER(TRIM(NVL(S.APL, 'X')))
+            AND UPPER(TRIM(NVL(T.PART_NUMBER, 'X')))
+                = UPPER(TRIM(NVL(S.PART_NUMBER, 'X')))
+            AND T.IS_DELETED = 0
+        )
+        WHEN MATCHED THEN
+            UPDATE SET
+                T.ERLID = S.ERLID,
+                T.ENTERED = S.ENTERED,
+                T.ASSIGNED = S.ASSIGNED,
+                T.REMOVED = S.REMOVED,
+                T.ONBOARD_LOCATION = S.ONBOARD_LOCATION,
+                T.FUND_CODE = S.FUND_CODE,
+                T.DD1149 = S.DD1149,
+                T.DATE_SHIP =
+                    CASE
+                        WHEN S.DATE_SHIP_TEXT IS NULL THEN NULL
+                        ELSE TO_DATE(
+                            SUBSTR(S.DATE_SHIP_TEXT, 1, 10),
+                            'YYYY-MM-DD'
+                        )
                     END,
-                REMOVAL_UPLOAD_DT = SYSTIMESTAMP,
-                REMOVAL_UPDATED_BY = P_UPDATED_BY,
-                UPDATED_DT = SYSTIMESTAMP,
-                UPDATED_BY = P_UPDATED_BY
-            WHERE ID = V_ID;
+                T.COMPLETE = S.COMPLETE,
+                T.REMOVED_QTY = S.REMOVED_QTY,
+                T.INA_TYPE = S.INA_TYPE,
+                T.SHIP_TO_ID = S.SHIP_TO_ID,
+                T.ERL_COMMENT = S.ERL_COMMENT,
+                T.CAS_REP_IND = S.CAS_REP_IND,
+                T.SHIPYARD = S.SHIPYARD,
+                T.REMOVAL_LOCATION = P_LOCATION,
+                T.REMOVAL_UPLOAD_DT = SYSTIMESTAMP,
+                T.REMOVAL_UPDATED_BY = P_UPDATED_BY,
+                T.UPDATED_DT = SYSTIMESTAMP,
+                T.UPDATED_BY = P_UPDATED_BY,
+                T.STATUS =
+                    CASE
+                        WHEN UPPER(NVL(S.COMPLETE, 'N'))
+                             IN ('Y', 'YES', 'TRUE', 'COMPLETE')
+                          OR UPPER(NVL(S.REMOVED, 'N'))
+                             IN ('Y', 'YES', 'REMOVED', 'SHIPPED')
+                        THEN 'Removed'
+                        ELSE T.STATUS
+                    END;
 
-            O_ACTION := 'UPDATED';
+        O_UPDATED_ROWS := SQL%ROWCOUNT;
 
-        EXCEPTION
-            WHEN NO_DATA_FOUND THEN
-                O_ACTION := 'NO_MATCH';
-        END;
-    END UPSERT_REMOVAL_UPLOAD_ROW;
+        COMMIT;
 
-END PKG_PHT_REMOVAL_UPLOAD;
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK;
+            RAISE;
+    END PROCESS_EXCEL_UPLOAD;
+
+END PKG_PHT_REMOVAL_STATUS;
 /
 
+--------------------
 
-CREATE OR REPLACE PACKAGE PRTHRVST.PKG_PHT_REMOVAL_UPLOAD AS
+CREATE OR REPLACE PACKAGE PRTHRVST.PKG_PHT_REMOVAL_STATUS AS
 
-    PROCEDURE UPSERT_REMOVAL_UPLOAD_ROW (
-        P_HULL              IN VARCHAR2,
-        P_NIIN              IN VARCHAR2,
-        P_APL               IN VARCHAR2,
-        P_PART_NUMBER       IN VARCHAR2,
-        P_ERLID             IN NUMBER,
-        P_ENTERED           IN VARCHAR2,
-        P_ASSIGNED          IN VARCHAR2,
-        P_REMOVED           IN VARCHAR2,
-        P_ONBOARD_LOCATION  IN VARCHAR2,
-        P_FUND_CODE         IN VARCHAR2,
-        P_DD1149            IN VARCHAR2,
-        P_DATE_SHIP         IN DATE,
-        P_COMPLETE          IN VARCHAR2,
-        P_REMOVED_QTY       IN NUMBER,
-        P_INA_TYPE          IN VARCHAR2,
-        P_SHIP_TO_ID        IN VARCHAR2,
-        P_ERL_COMMENT       IN VARCHAR2,
-        P_CAS_REP_IND       IN VARCHAR2,
-        P_SHIPYARD          IN VARCHAR2,
-        P_UPDATED_BY        IN VARCHAR2,
-        O_ACTION            OUT VARCHAR2
+    PROCEDURE GET_LOCATIONS (
+        O_CURSOR OUT SYS_REFCURSOR
     );
 
-END PKG_PHT_REMOVAL_UPLOAD;
+    PROCEDURE GET_SUMMARY (
+        P_LOCATION IN VARCHAR2,
+        O_CURSOR   OUT SYS_REFCURSOR
+    );
+
+    PROCEDURE GET_LOCATION_BREAKDOWN (
+        O_CURSOR OUT SYS_REFCURSOR
+    );
+
+    PROCEDURE GET_GRID (
+        P_LOCATION  IN VARCHAR2,
+        P_SEARCH    IN VARCHAR2,
+        P_OFFSET    IN NUMBER,
+        P_PAGE_SIZE IN NUMBER,
+        O_TOTAL     OUT NUMBER,
+        O_CURSOR    OUT SYS_REFCURSOR
+    );
+
+    PROCEDURE PROCESS_EXCEL_UPLOAD (
+        P_LOCATION      IN VARCHAR2,
+        P_UPDATED_BY    IN VARCHAR2,
+        P_ROWS_JSON     IN CLOB,
+        O_TOTAL_ROWS    OUT NUMBER,
+        O_UPDATED_ROWS  OUT NUMBER,
+        O_NO_MATCH_ROWS OUT NUMBER
+    );
+
+END PKG_PHT_REMOVAL_STATUS;
 /
+
+---------------------------------------------
+CREATE INDEX PRTHRVST.IX_PHT_REMOVAL_MATCH
+ON PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION
+(
+    HULL_ID,
+    NIIN_ID,
+    APL,
+    PART_NUMBER
+);
+
+---------------------------------------------
+ALTER TABLE PRTHRVST.PHT_MATERIAL_REQUEST_SUBMISSION ADD (
+    ERLID                    NUMBER,
+    ENTERED                  VARCHAR2(100 BYTE),
+    ASSIGNED                 VARCHAR2(100 BYTE),
+    REMOVED                  VARCHAR2(30 BYTE),
+    ONBOARD_LOCATION         VARCHAR2(200 BYTE),
+    FUND_CODE                VARCHAR2(100 BYTE),
+    DD1149                   VARCHAR2(100 BYTE),
+    DATE_SHIP                DATE,
+    COMPLETE                 VARCHAR2(30 BYTE),
+    REMOVED_QTY              NUMBER,
+    INA_TYPE                 VARCHAR2(100 BYTE),
+    SHIP_TO_ID               VARCHAR2(100 BYTE),
+    ERL_COMMENT              VARCHAR2(2000 BYTE),
+    CAS_REP_IND              VARCHAR2(50 BYTE),
+    SHIPYARD                 VARCHAR2(200 BYTE),
+    REMOVAL_LOCATION         VARCHAR2(100 BYTE),
+    REMOVAL_UPLOAD_DT        TIMESTAMP(6),
+    REMOVAL_UPDATED_BY       VARCHAR2(100 BYTE)
+);
+
+----------------------------------------------
